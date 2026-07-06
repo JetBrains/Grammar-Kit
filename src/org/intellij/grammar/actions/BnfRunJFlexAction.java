@@ -87,7 +87,7 @@ import static org.intellij.grammar.generator.batch.FileGeneratorUtil.getTargetDi
 public class BnfRunJFlexAction extends DumbAwareAction {
 
   private static final String JFLEX_URL =
-    "https://cache-redirector.jetbrains.com/intellij-dependencies/org/jetbrains/intellij/deps/jflex/jflex/1.9.2/jflex-1.9.2.jar";
+    "https://cache-redirector.jetbrains.com/intellij-dependencies/org/jetbrains/intellij/deps/jflex/jflex/1.10.17/jflex-1.10.17.jar";
 
   private static final String SKEL_NAME = "idea-flex.skeleton";
   private static final String JFLEX_JAR_PREFIX = "jflex-";

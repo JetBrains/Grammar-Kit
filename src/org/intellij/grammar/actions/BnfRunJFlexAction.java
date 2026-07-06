@@ -86,8 +86,9 @@ import static org.intellij.grammar.generator.batch.FileGeneratorUtil.getTargetDi
  */
 public class BnfRunJFlexAction extends DumbAwareAction {
 
-  private static final String JFLEX_URL = "https://cache-redirector.jetbrains.com/intellij-dependencies" +
-                                          "/org/jetbrains/intellij/deps/jflex/jflex/1.9.2/jflex-1.9.2.jar";
+  private static final String JFLEX_URL =
+    "https://cache-redirector.jetbrains.com/intellij-dependencies/org/jetbrains/intellij/deps/jflex/jflex/1.9.2/jflex-1.9.2.jar";
+
   private static final String SKEL_NAME = "idea-flex.skeleton";
   private static final String JFLEX_JAR_PREFIX = "jflex-";
   private static final String LIB_NAME = "JFlex & idea-flex.skeleton";
@@ -154,13 +155,13 @@ public class BnfRunJFlexAction extends DumbAwareAction {
    * JFlex is launched as a child process of the current JVM; output is shown in the console tab
    * identified by {@code batchId}.
    *
-   * @param project   the current project
-   * @param flexFile  the {@code .flex} grammar file to compile
-   * @param jflex     {@code first} — the JFlex JAR; {@code second} — the skeleton file (may be {@code null})
-   * @param batchId   opaque identifier that groups multiple files from a single action invocation
-   *                  into the same console tab (see {@link #showConsole})
+   * @param project  the current project
+   * @param flexFile the {@code .flex} grammar file to compile
+   * @param jflex    {@code first} — the JFlex JAR; {@code second} — the skeleton file (may be {@code null})
+   * @param batchId  opaque identifier that groups multiple files from a single action invocation
+   *                 into the same console tab (see {@link #showConsole})
    * @return a callback that is {@linkplain ActionCallback#setDone() done} on exit code 0,
-   *         or {@linkplain ActionCallback#setRejected() rejected} on failure
+   * or {@linkplain ActionCallback#setRejected() rejected} on failure
    */
   public static ActionCallback doGenerate(@NotNull Project project,
                                           @NotNull VirtualFile flexFile,
@@ -326,7 +327,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
    * </ol>
    *
    * @return a pair of {@code (jflex jar, skeleton file)}, where the skeleton may be {@code null}
-   *         if extraction failed; or {@code null} if the JAR could not be obtained at all
+   * if extraction failed; or {@code null} if the JAR could not be obtained at all
    */
   private static @Nullable Couple<File> getOrDownload(@NotNull Project project) {
     LibraryTable libraryTable = LibraryTablesRegistrar.getInstance().getLibraryTable();
@@ -363,7 +364,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
    *
    * @param rootUrls class-root URLs as returned by {@link Library#getUrls(OrderRootType)}
    * @return a pair of {@code (jar, skeleton)} if at least the JAR was found, otherwise {@code null};
-   *         the skeleton element may be {@code null} if only the JAR was present in the roots
+   * the skeleton element may be {@code null} if only the JAR was present in the roots
    */
   private static @Nullable Couple<File> findInUrls(String... rootUrls) {
     File jarFile = null, skelFile = null;
@@ -397,7 +398,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
    * which shows a progress dialog to the user.
    *
    * @return the downloaded JAR as a local {@link File}, or {@code null} if the download was
-   *         cancelled or failed
+   * cancelled or failed
    */
   private static @Nullable File downloadJFlex(@NotNull Project project) {
     String url = JFLEX_URL;

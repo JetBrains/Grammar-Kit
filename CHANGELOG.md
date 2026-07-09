@@ -2,6 +2,10 @@
 
 ## [Unreleased]
 
+## [2023.3.4]
+
+* Maven Central: publish `org.jetbrains:grammar-kit` as a single self-contained jar again. After the multi-module split in 2023.3.3 the published POM declared transitive dependencies on subprojects, breaking the artifact.
+
 ## [2023.3.3]
 
 * JFlex: update library from jflex-1.9.2 to jflex-1.10.17

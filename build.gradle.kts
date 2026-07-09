@@ -10,6 +10,9 @@ import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.ChangelogSectionUrlBuilder
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import java.util.Base64
+import java.util.zip.ZipFile
+import org.gradle.api.artifacts.ProjectDependency
+import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 
 plugins {
     java
@@ -150,18 +153,46 @@ changelog {
 
 val artifactsPath = providers.gradleProperty("artifactsPath")
 
+// Local modules bundled into the single self-contained `grammar-kit` jar, derived from the declared
+// project dependencies rather than a hand-written list. A newly added `implementation(project(...))`
+// module is therefore bundled (and verified) automatically, with no list to keep in sync.
+// These must NOT leak into the published POM as transitive `org.jetbrains:*` dependencies — those
+// per-module artifacts are not published to Maven Central.
+val bundledProjectPaths: List<String> =
+    configurations.implementation.get().dependencies
+        .withType(ProjectDependency::class.java)
+        .map { it.path }
+bundledProjectPaths.forEach { evaluationDependsOn(it) }
+
+fun Project.mainSourceSet(): SourceSet =
+    extensions.getByType(SourceSetContainer::class.java).getByName("main")
+
 val buildGrammarKitJar by tasks.registering(Jar::class) {
     dependsOn("assemble")
     archiveBaseName = "grammar-kit"
     destinationDirectory = file(artifactsPath)
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     manifest {
         from("$rootDir/resources/META-INF/MANIFEST.MF")
     }
     from(sourceSets.main.get().output)
+    bundledProjectPaths.forEach { from(project(it).mainSourceSet().output) }
     from(file("$rootDir/parser-runtime/src/org/intellij/grammar/parser/GeneratedParserUtilBase.java")) {
         into("/templates")
     }
     exclude("**/classpath.index")
+}
+
+// Make the -sources jar self-contained too, matching the fat jar.
+tasks.named<Jar>("sourcesJar") {
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
+    bundledProjectPaths.forEach { from(project(it).mainSourceSet().allSource) }
+}
+
+// The publication attaches the fat jar via `artifact(...)`, not a software component, so no Gradle
+// module metadata is produced. Disable the task explicitly to avoid a stale/misleading `.module` file.
+tasks.withType<GenerateModuleMetadata>().configureEach {
+    enabled = false
 }
 
 val modernAnnotations = configurations.detachedConfiguration(dependencies.create(libs.annotations.get()))
@@ -330,9 +361,14 @@ publishing {
             groupId = project.group.toString()
             artifactId = project.name
             version = project.version.toString()
-            from(components["java"])
-//            artifact(tasks["sourcesJar"])
-//            artifact(tasks["javadocJar"])
+
+            // Publish the single fat jar bundling every module. Using `from(components["java"])`
+            // here would package only the root module's classes and declare `:base`,
+            // `:parser-runtime`, `:bnf-language`, `:jflex-language` and `:generator` as transitive
+            // `org.jetbrains:*` dependencies that don't exist on Maven Central (see #2023.3.3 breakage).
+            artifact(buildGrammarKitJar)
+            artifact(tasks["sourcesJar"])
+            artifact(tasks["javadocJar"])
 
             pom {
                 name = "JetBrains Grammar-Kit"
@@ -370,4 +406,124 @@ signing {
 
     useInMemoryPgpKeys(signingKey, signingPassword)
     sign(publishing.publications["grammarKitJar"])
+}
+
+// --- Distribution structure guards ------------------------------------------------------------
+// Regression tests for the shape of what we ship. These would have caught the 2023.3.3 breakage,
+// where the Maven artifact became a thin jar with transitive `org.jetbrains:*` dependencies that
+// are not published to Maven Central.
+
+val verifyMavenDistribution by tasks.registering {
+    group = "verification"
+    description = "Fails unless the Maven Central artifact is a self-contained fat jar with a dependency-free POM."
+    dependsOn(buildGrammarKitJar, "generatePomFileForGrammarKitJarPublication")
+
+    val jarFile = buildGrammarKitJar.flatMap { it.archiveFile }
+    val pomFile = layout.buildDirectory.file("publications/grammarKitJar/pom-default.xml")
+    val moduleFile = layout.buildDirectory.file("publications/grammarKitJar/module.json")
+
+    // The set of local modules the library needs at runtime, discovered from the resolved dependency
+    // graph — NOT from the bundling config. This is what makes the guard catch a newly added
+    // submodule (direct or transitive): it shows up here, and the fat jar had better contain it.
+    val runtimeModuleJars = configurations.named("runtimeClasspath").map { rc ->
+        rc.incoming.artifacts.artifacts
+            .filter { it.id.componentIdentifier is ProjectComponentIdentifier }
+            .associate { (it.id.componentIdentifier as ProjectComponentIdentifier).projectPath to it.file }
+    }
+
+    inputs.file(jarFile)
+    inputs.file(pomFile)
+    inputs.files(runtimeModuleJars.map { it.values })
+
+    doLast {
+        val problems = mutableListOf<String>()
+
+        // 1. A self-contained fat jar must declare NO dependencies (any would be an unpublished
+        //    org.jetbrains:* module). Checking for the block itself also covers a future new module.
+        val pomText = pomFile.get().asFile.readText()
+        if (pomText.contains("<dependencies>")) {
+            problems += "POM declares <dependencies>; a self-contained fat jar must have none"
+        }
+        if (pomText.contains("<packaging>pom</packaging>")) {
+            problems += "POM packaging is 'pom'; expected a real 'jar' artifact"
+        }
+
+        // 2. The fat jar must be a SUPERSET of every runtime module's classes. A module that isn't
+        //    bundled — including a brand-new one — leaves its classes missing here and fails the build.
+        val fatEntries = ZipFile(jarFile.get().asFile).use { zip ->
+            zip.entries().toList().map { it.name }.toSet()
+        }
+        val modules = runtimeModuleJars.get()
+        if (modules.isEmpty()) {
+            problems += "No local modules found on the runtime classpath; cannot verify bundling"
+        }
+        modules.toSortedMap().forEach { (path, jar) ->
+            val moduleClasses = ZipFile(jar).use { zip ->
+                zip.entries().toList().map { it.name }.filter { it.endsWith(".class") }.toSet()
+            }
+            val missing = moduleClasses - fatEntries
+            if (missing.isNotEmpty()) {
+                problems += "Fat jar is missing ${missing.size} class(es) from module '$path' " +
+                    "(e.g. ${missing.min()}); add it to buildGrammarKitJar"
+            }
+        }
+
+        // 3. Standalone generation template + manifest must be present.
+        listOf("templates/GeneratedParserUtilBase.java", "META-INF/MANIFEST.MF").forEach {
+            if (it !in fatEntries) problems += "Fat jar is missing required entry: $it"
+        }
+
+        // 4. No Gradle module metadata: a `.module` file would re-introduce the module variants.
+        if (moduleFile.get().asFile.exists()) {
+            problems += "Gradle module metadata was generated; it would point consumers at unpublished module variants"
+        }
+
+        if (problems.isNotEmpty()) {
+            throw GradleException("Maven distribution structure check failed:\n" + problems.joinToString("\n") { "  - $it" })
+        }
+        logger.lifecycle(
+            "Maven distribution OK: self-contained jar (${fatEntries.count { it.endsWith(".class") }} classes) " +
+                "bundling ${modules.size} modules ${modules.keys.sorted()}, dependency-free POM, no module metadata."
+        )
+    }
+}
+
+val verifyPluginDistribution by tasks.registering {
+    group = "verification"
+    description = "Fails unless the plugin distribution bundles every module jar (plus the main jar) under lib/."
+    val buildPluginTask = tasks.named("buildPlugin")
+    dependsOn(buildPluginTask)
+
+    val zipFile = buildPluginTask.map { it.outputs.files.singleFile }
+    val moduleNames = bundledProjectPaths.map { it.removePrefix(":") }
+    inputs.file(zipFile)
+
+    doLast {
+        val libJars = ZipFile(zipFile.get()).use { zip ->
+            zip.entries().toList().map { it.name }
+        }.filter { it.matches(Regex(".*/lib/[^/]+\\.jar$")) }
+
+        val problems = mutableListOf<String>()
+        moduleNames.forEach { module ->
+            if (libJars.none { it.endsWith(".$module.jar") }) {
+                problems += "Plugin distribution is missing the '$module' module jar under lib/"
+            }
+        }
+        if (libJars.none { it.substringAfterLast('/').startsWith("grammar-kit-") }) {
+            problems += "Plugin distribution is missing the main grammar-kit jar under lib/"
+        }
+
+        if (problems.isNotEmpty()) {
+            throw GradleException("Plugin distribution structure check failed:\n" + problems.joinToString("\n") { "  - $it" })
+        }
+        logger.lifecycle("Plugin distribution OK: ${libJars.size} jars under lib/ (all modules bundled).")
+    }
+}
+
+// Gate CI (`check`) and — critically — the Maven Central upload on the structure guards.
+tasks.named("check") {
+    dependsOn(verifyMavenDistribution, verifyPluginDistribution)
+}
+tasks.named("packSonatypeCentralBundle") {
+    dependsOn(verifyMavenDistribution)
 }

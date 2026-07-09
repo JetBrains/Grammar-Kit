@@ -2,6 +2,8 @@
 
 ## [Unreleased]
 
+## [2023.3.3]
+
 * JFlex: update library from jflex-1.9.2 to jflex-1.10.17
 * Generator: fix parser generation for reserved-name rules passed as meta/external arguments
 * Find Usages: search `.bnf` files for private Java/Kotlin declarations; Kotlin support gated behind an optional Kotlin plugin dependency [#448](https://github.com/JetBrains/Grammar-Kit/pull/448)

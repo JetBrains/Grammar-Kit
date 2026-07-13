@@ -92,6 +92,19 @@ select_statement ::= SELECT ... {pin=1}  // something has to be pinned!
                                          // pin="SELECT" is a valid alternative
 ````
 
+Sometimes it is useful to pin a predicate at the beginning of the inner rule:
+
+````
+block ::= '{' item * '}'
+private item ::= !'}' (item_foo | item_bar) {
+  pin=1 // This pin allows to recover in { BAZ FOO } case
+  recoverWhile="item_recover"
+}
+private item_recover ::= !('}' | FOO | BAR)
+item_foo ::= FOO
+item_bar ::= BAR
+````
+
 2.3 When nothing helps: *external* rules
 ----------------------------------------
 

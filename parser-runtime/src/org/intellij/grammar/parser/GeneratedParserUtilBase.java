@@ -22,6 +22,7 @@ import com.intellij.psi.impl.source.tree.CompositePsiElement;
 import com.intellij.psi.tree.ICompositeElementType;
 import com.intellij.psi.tree.IElementType;
 import com.intellij.psi.tree.TokenSet;
+import com.intellij.util.ArrayUtil;
 import com.intellij.util.Function;
 import com.intellij.util.PairProcessor;
 import com.intellij.util.containers.ContainerUtil;
@@ -106,6 +107,7 @@ public class GeneratedParserUtilBase {
   };
 
 
+  @SuppressWarnings("unused")
   public static boolean eof(PsiBuilder builder, int level) {
     return builder.eof();
   }
@@ -132,8 +134,7 @@ public class GeneratedParserUtilBase {
   }
 
   public static boolean invalid_left_marker_guard_(PsiBuilder builder, PsiBuilder.Marker marker, String funcName) {
-    //builder.error("Invalid left marker encountered in " + funcName_ +" at offset " + builder.getCurrentOffset());
-    boolean goodMarker = marker != null; // && ((LighterASTNode)marker).getTokenType() != TokenType.ERROR_ELEMENT;
+    boolean goodMarker = marker != null;
     if (!goodMarker) return false;
     ErrorState state = ErrorState.get(builder);
 
@@ -211,13 +212,10 @@ public class GeneratedParserUtilBase {
     return consumeTokenFast(builder, token);
   }
 
+  @Contract(mutates = "param1")
   public static boolean consumeToken(PsiBuilder builder, IElementType token) {
     addVariantSmart(builder, token, true);
-    if (nextTokenIsFast(builder, token)) {
-      builder.advanceLexer();
-      return true;
-    }
-    return false;
+    return consumeTokenFast(builder, token);
   }
 
   public static boolean consumeTokenFast(PsiBuilder builder, IElementType token) {
@@ -252,12 +250,20 @@ public class GeneratedParserUtilBase {
   }
 
   public static boolean consumeToken(PsiBuilder builder, TokenSet tokens) {
-    addVariantSmart(builder, tokens.getTypes(), true);
+    ErrorState state = ErrorState.get(builder);
+    builder.eof(); // skip whitespaces
+    if (!state.suppressErrors && state.predicateCount < 2) {
+      for (IElementType type : tokens.getTypes()) addVariant(builder, state, type);
+    }
     return consumeTokenFast(builder, tokens);
   }
 
   public static boolean consumeTokenSmart(PsiBuilder builder, TokenSet tokens) {
-    addCompletionVariantSmart(builder, tokens.getTypes());
+    ErrorState state = ErrorState.get(builder);
+    CompletionState completionState = state.completionState;
+    if (completionState != null && state.predicateSign) {
+      for (IElementType type : tokens.getTypes()) addCompletionVariant(builder, completionState, type);
+    }
     return consumeTokenFast(builder, tokens);
   }
 
@@ -275,10 +281,7 @@ public class GeneratedParserUtilBase {
 
   public static boolean nextTokenIsFast(PsiBuilder builder, IElementType... tokens) {
     IElementType tokenType = builder.getTokenType();
-    for (IElementType token : tokens) {
-      if (token == tokenType) return true;
-    }
-    return false;
+    return ArrayUtil.indexOfIdentity(tokens, tokenType) != -1;
   }
 
   public static boolean nextTokenIsFast(PsiBuilder builder, TokenSet tokens) {
@@ -312,10 +315,7 @@ public class GeneratedParserUtilBase {
       }
     }
     if (tokenType == null) return false;
-    for (IElementType token : tokens) {
-      if (tokenType == token) return true;
-    }
-    return false;
+    return ArrayUtil.indexOfIdentity(tokens, tokenType) != -1;
   }
 
   public static boolean nextTokenIs(PsiBuilder builder, IElementType token) {
@@ -762,8 +762,7 @@ public class GeneratedParserUtilBase {
     }
   }
 
-  @Nullable
-  private static PsiBuilderImpl.ProductionMarker getLatestExtensibleDoneMarker(@NotNull PsiBuilder builder) {
+  private static @Nullable PsiBuilderImpl.ProductionMarker getLatestExtensibleDoneMarker(@NotNull PsiBuilder builder) {
     PsiBuilderImpl.ProductionMarker marker = ContainerUtil.getLastItem(((Builder)builder).getProductions());
     return marker == null || marker.getTokenType() == null || !(marker instanceof PsiBuilder.Marker) ? null : marker;
   }
@@ -843,9 +842,8 @@ public class GeneratedParserUtilBase {
       offset = offset_;
     }
 
-    @Nullable
-    public String convertItem(Object o) {
-      return o instanceof Object[] ? join((Object[]) o, this, " ") : o.toString();
+    public @Nullable String convertItem(Object o) {
+      return o instanceof Object[] objects ? join(objects, this, " ") : o.toString();
     }
 
     @Override
@@ -908,13 +906,11 @@ public class GeneratedParserUtilBase {
       parser = parser_;
     }
 
-    @NotNull
-    public Lexer getLexer() {
+    public @NotNull Lexer getLexer() {
       return ((PsiBuilderImpl)myDelegate).getLexer();
     }
 
-    @NotNull
-    public List<PsiBuilderImpl.ProductionMarker> getProductions() {
+    public @NotNull List<PsiBuilderImpl.ProductionMarker> getProductions() {
       return ((PsiBuilderImpl)myDelegate).getProductions();
     }
   }
@@ -933,8 +929,8 @@ public class GeneratedParserUtilBase {
 
     public Frame currentFrame;
     public CompletionState completionState;
-    MyList<Variant> variants = new MyList<>(INITIAL_VARIANTS_SIZE);
-    MyList<Variant> unexpected = new MyList<>(INITIAL_VARIANTS_SIZE / 10);
+    final MyList<Variant> variants = new MyList<>(INITIAL_VARIANTS_SIZE);
+    final MyList<Variant> unexpected = new MyList<>(INITIAL_VARIANTS_SIZE / 10);
 
     int predicateCount;
     int level;
@@ -989,7 +985,7 @@ public class GeneratedParserUtilBase {
       Arrays.sort(strings);
       count = 0;
       for (String s : strings) {
-        if (s.length() == 0) continue;
+        if (s.isEmpty()) continue;
         if (count++ > 0) {
           if (count > MAX_VARIANTS_TO_DISPLAY) {
             sb.append(" and ...");
@@ -1104,19 +1100,7 @@ public class GeneratedParserUtilBase {
     }
   }
 
-  private static class Hooks<T> {
-    final Hook<T> hook;
-    final T param;
-    final int level;
-    final Hooks<?> next;
-
-    Hooks(Hook<T> hook, T param, int level, Hooks next) {
-      this.hook = hook;
-      this.param = param;
-      this.level = level;
-      this.next = next;
-    }
-
+  private record Hooks<T>(Hook<T> hook, T param, int level, Hooks next) {
     static <E> Hooks<E> concat(Hook<E> hook, E param, int level, Hooks<?> hooks) {
       return new Hooks<>(hook, param, level, hooks);
     }
@@ -1233,9 +1217,8 @@ public class GeneratedParserUtilBase {
       super("DUMMY_BLOCK", Language.ANY);
     }
 
-    @NotNull
     @Override
-    public ASTNode createCompositeNode() {
+    public @NotNull ASTNode createCompositeNode() {
       return new DummyBlock();
     }
   }
@@ -1250,9 +1233,8 @@ public class GeneratedParserUtilBase {
       return PsiReference.EMPTY_ARRAY;
     }
 
-    @NotNull
     @Override
-    public Language getLanguage() {
+    public @NotNull Language getLanguage() {
       return getParent().getLanguage();
     }
   }

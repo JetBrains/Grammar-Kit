@@ -251,7 +251,7 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
       else {
         BnfExpression expression = tokensAttr.getExpression();
         List<BnfListEntry> entryList = expression instanceof BnfValueList ? ((BnfValueList) expression).getListEntryList() : null;
-        if (entryList == null || entryList.isEmpty()) {
+        if (ContainerUtil.isEmpty(entryList)) {
           tokensAttr = (BnfAttr)tokensAttr.replace(newAttr);
           BnfValueList attrExpr = (BnfValueList)Objects.requireNonNull(tokensAttr.getExpression());
           return attrExpr.getListEntryList().get(0);
@@ -265,7 +265,7 @@ public class BnfIntroduceTokenHandler implements RefactoringActionHandler {
           }
           BnfValueList attrExpr = (BnfValueList)Objects.requireNonNull(newAttr.getExpression());
           BnfListEntry newValue = attrExpr.getListEntryList().get(0);
-          PsiElement anchor = entryList.get(entryList.size() - 1);
+          PsiElement anchor = ContainerUtil.getLastItem(entryList);
           newValue = (BnfListEntry) expression.addAfter(newValue, anchor);
           expression.addAfter(BnfElementFactory.createLeafFromText(project, "\n    "), anchor);
           return newValue;

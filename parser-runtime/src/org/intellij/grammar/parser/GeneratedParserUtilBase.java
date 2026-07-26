@@ -280,9 +280,8 @@ public class GeneratedParserUtilBase {
 
   public static boolean consumeToken(PsiBuilder builder, TokenSet tokens) {
     ErrorState state = ErrorState.get(builder);
-    builder.eof(); // skip whitespaces
     if (!state.suppressErrors && state.predicateCount < 2) {
-      for (IElementType type : tokens.getTypes()) addVariant(builder, state, type);
+      addVariants(builder, state, tokens.getTypes());
     }
     return consumeTokenFast(builder, tokens);
   }
@@ -339,9 +338,7 @@ public class GeneratedParserUtilBase {
       addVariantInner(state, state.currentFrame, builder.rawTokenIndex(), frameName);
     }
     else {
-      for (IElementType token : tokens) {
-        addVariant(builder, state, token);
-      }
+      addVariants(builder, state, tokens);
     }
     if (tokenType == null) return false;
     return ArrayUtil.indexOfIdentity(tokens, tokenType) != -1;
@@ -412,6 +409,23 @@ public class GeneratedParserUtilBase {
     CompletionState completionState = state.completionState;
     if (completionState != null && state.predicateSign) {
       addCompletionVariant(builder, completionState, o);
+    }
+  }
+
+  /**
+   * Registers every token as a separate variant, so that expected and completion text names the tokens.
+   *
+   * <p>Nothing in the loop advances the lexer, so the whitespace skip, the token position and the completion check stay
+   * the same for every token and are done once.
+   */
+  private static void addVariants(PsiBuilder builder, ErrorState state, IElementType[] tokens) {
+    builder.eof(); // skip whitespaces
+    int pos = builder.rawTokenIndex();
+    CompletionState completionState = state.completionState;
+    boolean completion = completionState != null && state.predicateSign;
+    for (IElementType token : tokens) {
+      addVariantInner(state, state.currentFrame, pos, token);
+      if (completion) addCompletionVariant(builder, completionState, token);
     }
   }
 

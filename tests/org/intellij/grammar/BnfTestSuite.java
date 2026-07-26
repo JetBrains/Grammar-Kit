@@ -13,6 +13,7 @@ import org.intellij.grammar.expression.ExpressionParserTest;
 import org.intellij.grammar.generator.JavaBnfGeneratorTest;
 import org.intellij.grammar.generator.KotlinBnfGeneratorTest;
 import org.intellij.grammar.inspection.BnfHighlightingTest;
+import org.intellij.grammar.parser.TokenSetVariantsTest;
 import org.intellij.grammar.search.BnfFileUseScopeEnlargerTest;
 import org.intellij.grammar.intention.BnfConvertOptExpressionIntentionTest;
 import org.intellij.grammar.intention.BnfFlipChoiceIntentionTest;
@@ -58,6 +59,7 @@ public class BnfTestSuite extends TestCase {
       testSuite.addTestSuite(ExpressionParserTest.class);
       testSuite.addTestSuite(BnfLivePreviewParserTest.class);
       testSuite.addTestSuite(KotlinBnfGeneratorTest.class);
+      testSuite.addTestSuite(TokenSetVariantsTest.class);
       return testSuite;
     }
   }

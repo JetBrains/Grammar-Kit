@@ -20,7 +20,6 @@ import com.intellij.openapi.vfs.VirtualFile;
 import com.intellij.openapi.vfs.VirtualFileUtil;
 import com.intellij.psi.search.FilenameIndex;
 import com.intellij.psi.search.ProjectScope;
-import org.intellij.grammar.BnfFileType;
 import org.intellij.grammar.config.Options;
 import org.intellij.grammar.generator.CommonBnfConstants;
 

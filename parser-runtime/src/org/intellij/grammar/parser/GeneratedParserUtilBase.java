@@ -46,7 +46,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Deque;
 import java.util.HashSet;
-import java.util.List;
 
 import static com.intellij.openapi.util.text.StringUtil.first;
 import static com.intellij.openapi.util.text.StringUtil.isEmpty;
@@ -931,11 +930,6 @@ public class GeneratedParserUtilBase {
 
     public @NotNull Lexer getLexer() {
       return ((PsiBuilderImpl)myDelegate).getLexer();
-    }
-
-    @Override
-    public @NotNull List<? extends Production> getProductions() {
-      return myDelegate.getProductions();
     }
   }
 

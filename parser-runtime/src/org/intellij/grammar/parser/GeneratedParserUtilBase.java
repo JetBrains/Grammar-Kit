@@ -38,6 +38,7 @@ import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.LimitedPool;
 import org.intellij.grammar.config.Options;
 import org.jetbrains.annotations.Contract;
+import org.jetbrains.annotations.NonNls;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
@@ -1062,7 +1063,7 @@ public class GeneratedParserUtilBase {
     public int position;
     public int level;
     public int modifiers;
-    public String name;
+    public @NonNls String name;
     public int variantCount;
     public int errorReportedAt;
     public int lastVariantAt;
@@ -1094,7 +1095,7 @@ public class GeneratedParserUtilBase {
     }
 
     @Override
-    public String toString() {
+    public @NonNls String toString() {
       String mod = modifiers == _NONE_ ? "_NONE_, " :
         ((modifiers & _COLLAPSE_) != 0? "_CAN_COLLAPSE_, ": "") +
         ((modifiers & _LEFT_) != 0? "_LEFT_, ": "") +

@@ -66,7 +66,6 @@ public class RuleGraphHelper {
   private final MultiMap<BnfRule, BnfRule> myRulesGraph = newMultiMap();
   private final Map<BnfRule, Map<PsiElement, Cardinality>> myRuleContentsMap = new HashMap<>();
   private final MultiMap<BnfRule, PsiElement> myRulesCollapseMap = newMultiMap();
-  private final Set<BnfRule> myRulesWithTokens = new HashSet<>();
   private final Map<String, PsiElement> myExternalElements = new HashMap<>();
 
   private static final IElementType EXTERNAL_TYPE = new FakeElementType("EXTERNAL_TYPE", Language.ANY);
@@ -294,9 +293,6 @@ public class RuleGraphHelper {
         if (r != null) {
           myRulesGraph.putValue(rule, r);
         }
-        else if (e instanceof BnfReferenceOrToken || e instanceof BnfStringLiteralExpression) {
-          myRulesWithTokens.add(rule);
-        }
       }
     }
     for (BnfRule rule : myFile.getRules()) {
@@ -310,10 +306,6 @@ public class RuleGraphHelper {
 
   public Collection<BnfRule> getExtendsRules(BnfRule rule) {
     return myRuleExtendsMap.get(rule);
-  }
-
-  public boolean containsTokens(BnfRule rule) {
-    return myRulesWithTokens.contains(rule);
   }
 
   public Collection<BnfRule> getSubRules(BnfRule rule) {

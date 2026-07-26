@@ -212,6 +212,7 @@ public class GeneratedParserUtilBase {
     return consumeTokenFast(builder, token);
   }
 
+  @Contract(mutates = "this")
   public static boolean consumeToken(PsiBuilder builder, IElementType token) {
     addVariantSmart(builder, token, true);
     if (nextTokenIsFast(builder, token)) {

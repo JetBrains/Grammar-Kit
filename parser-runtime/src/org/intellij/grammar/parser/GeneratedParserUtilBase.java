@@ -786,7 +786,7 @@ public class GeneratedParserUtilBase {
   private static @Nullable PsiBuilder.Marker getLatestExtensibleDoneMarker(@NotNull PsiBuilder builder) {
     SyntaxTreeBuilder.Production marker = ContainerUtil.getLastItem(builder.getProductions());
     if (marker == null || marker.isCollapsed()) return null;
-    return marker.getTokenType() != null && marker instanceof PsiBuilder.Marker ? (PsiBuilder.Marker)marker : null;
+    return marker.getTokenType() != null && marker instanceof PsiBuilder.Marker psiMarker ? psiMarker : null;
   }
 
   private static boolean reportError(PsiBuilder builder,

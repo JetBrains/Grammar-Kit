@@ -937,8 +937,8 @@ public class GeneratedParserUtilBase {
     }
 
     @Override
-    public @NotNull List<PsiBuilderImpl.ProductionMarker> getProductions() {
-      return ((PsiBuilderImpl)myDelegate).getProductions();
+    public @NotNull List<? extends Production> getProductions() {
+      return myDelegate.getProductions();
     }
   }
 

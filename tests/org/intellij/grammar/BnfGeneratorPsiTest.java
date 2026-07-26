@@ -10,6 +10,7 @@ import com.intellij.psi.*;
 import com.intellij.psi.search.GlobalSearchScope;
 import com.intellij.testFramework.fixtures.BasePlatformTestCase;
 import com.intellij.util.ProcessingContext;
+import org.intellij.grammar.generator.Generator;
 import org.intellij.grammar.generator.JavaParserGenerator;
 import org.intellij.grammar.generator.NameShortener;
 import org.intellij.grammar.generator.OutputOpener;
@@ -237,7 +238,7 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
     // PsiHelper.getAnnotationsInner() fails to filter @NotNull from method annotations
     // when PsiType.getAnnotations() doesn't return annotations on inner type components
     // of qualified types. We simulate this by wrapping the JavaHelper.
-    Field javaHelperField = JavaParserGenerator.class.getDeclaredField("myJavaHelper");
+    Field javaHelperField = Generator.class.getDeclaredField("myJavaHelper");
     javaHelperField.setAccessible(true);
     JavaHelper original = (JavaHelper) javaHelperField.get(generator);
     javaHelperField.set(generator, new DuplicateAnnotationJavaHelper(original));

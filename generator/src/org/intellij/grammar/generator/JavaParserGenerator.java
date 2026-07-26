@@ -67,10 +67,8 @@ import static org.intellij.grammar.psi.BnfTypes.*;
 public final class JavaParserGenerator extends Generator {
   public static final Logger LOG = Logger.getInstance(JavaParserGenerator.class);
   
-  private final Set<String> myTokensUsedInGrammar = new LinkedHashSet<>();
   private final boolean myNoStubs;
 
-  private final String myGrammarRoot;
   private final String myGrammarRootParser;
   private final String myParserUtilClass;
   private final String myPsiImplUtilClass;
@@ -83,9 +81,7 @@ public final class JavaParserGenerator extends Generator {
   private final String myParserTypeHolderClass;
   private final String myPsiElementTypeHolderClass;
 
-  private final ExpressionHelper myExpressionHelper;
   private final RuleMethodsHelper myRulesMethodsHelper;
-  private final JavaHelper myJavaHelper;
 
   public JavaParserGenerator(@NotNull BnfFile psiFile,
                              @NotNull String sourcePath,
@@ -108,13 +104,10 @@ public final class JavaParserGenerator extends Generator {
     myParserTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
     myPsiElementTypeHolderClass = getRootAttribute(myFile, KnownAttribute.ELEMENT_TYPE_HOLDER_CLASS);
 
-    myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, this::addWarning);
     myRulesMethodsHelper = new RuleMethodsHelper(myGraphHelper, myExpressionHelper, mySimpleTokens, G);
-    myJavaHelper = JavaHelper.getJavaHelper(myFile);
 
     List<BnfRule> rules = psiFile.getRules();
-    BnfRule rootRule = rules.isEmpty() ? null : rules.get(0);
-    myGrammarRoot = rootRule == null ? null : rootRule.getName();
+    BnfRule rootRule = ContainerUtil.getFirstItem(rules);
     for (BnfRule r : rules) {
       String ruleName = r.getName();
       boolean noPsi = !hasPsiClass(r);
@@ -876,21 +869,6 @@ public final class JavaParserGenerator extends Generator {
     return dropFrameName && StringUtil.isEmpty(getAttribute(rule, KnownAttribute.NAME)) ? null : frameName;
   }
 
-  private @NotNull ConsumeType getRuleConsumeType(@NotNull BnfRule rule, @Nullable BnfRule contextRule) {
-    ConsumeType forcedConsumeType = ExpressionGeneratorHelper.fixForcedConsumeType(myExpressionHelper, rule, null, null);
-    if (forcedConsumeType != null && contextRule != null && myExpressionHelper.getExpressionInfo(contextRule) == null) {
-      // do not force child expr consume-type in a non-expr context
-      forcedConsumeType = null;
-    }
-    return ObjectUtils.chooseNotNull(forcedConsumeType, ConsumeType.forRule(rule));
-  }
-
-  private @NotNull List<String> collectMetaParametersFormatted(@NotNull BnfRule rule, @Nullable BnfExpression expression) {
-    if (expression == null) return Collections.emptyList();
-    return map(GrammarUtil.collectMetaParameters(rule, expression),
-               it -> formatMetaParamName(it.substring(2, it.length() - 2)));
-  }
-
   @Override
   @NotNull NodeCall generateTokenSequenceCall(List<BnfExpression> children,
                                                       int startIndex,
@@ -1014,24 +992,6 @@ public final class JavaParserGenerator extends Generator {
         return new MetaMethodCall(null, nextName, N.builder, N.level, map(extraArguments, MetaParameterArgument::new));
       }
     }
-  }
-
-  private @NotNull ConsumeType getEffectiveConsumeType(@NotNull BnfRule rule,
-                                                       @Nullable BnfExpression node,
-                                                       @Nullable ConsumeType forcedConsumeType) {
-    if (forcedConsumeType == ConsumeType.DEFAULT) return ConsumeType.DEFAULT;
-    PsiElement parent = node == null ? null : node.getParent();
-
-    if (forcedConsumeType == null && parent instanceof BnfSequence &&
-        ContainerUtil.getFirstItem(((BnfSequence)parent).getExpressionList()) != node) {
-      Set<BnfExpression> expressions = BnfFirstNextAnalyzer.createAnalyzer(false, false, o -> o != parent)
-        .calcFirst((BnfExpression)parent);
-      if (expressions.size() != 1 || expressions.iterator().next() != node) {
-        return ConsumeType.DEFAULT;
-      }
-    }
-    ConsumeType fixed = ExpressionGeneratorHelper.fixForcedConsumeType(myExpressionHelper, rule, node, forcedConsumeType);
-    return fixed != null ? fixed : ConsumeType.forRule(rule);
   }
 
   @NotNull NodeCall generateExternalCall(@NotNull BnfRule rule,
@@ -1235,13 +1195,6 @@ public final class JavaParserGenerator extends Generator {
       out("}");
     }
     out("}");
-  }
-
-  private boolean isIgnoredWhitespaceToken(@NotNull String tokenName, @NotNull String tokenText) {
-    return isRegexpToken(tokenText) &&
-           !myTokensUsedInGrammar.contains(tokenName) &&
-           matchesAny(getRegexpTokenRegexp(tokenText), " ", "\n") &&
-           !matchesAny(getRegexpTokenRegexp(tokenText), "a", "1", "_", ".");
   }
 
   private void generateTokenSets() {

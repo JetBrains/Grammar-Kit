@@ -290,11 +290,16 @@ import com.intellij.extapi.psi.StubBasedPsiElementBase;
 import test.stub.Element3Stub;
 import test.psi.*;
 import com.intellij.psi.stubs.IStubElementType;
+import org.jetbrains.annotations.ApiStatus.Experimental;
 import com.intellij.psi.tree.IElementType;
 
 public class Element3Impl extends StubBasedPsiElementBase<Element3Stub> implements Element3 {
 
   public Element3Impl(@NotNull Element3Stub stub, @NotNull IStubElementType<?, ?> type) {
+    super(stub, type);
+  }
+
+  public Element3Impl(@NotNull Element3Stub stub, @NotNull IElementType type) {
     super(stub, type);
   }
 
@@ -338,11 +343,16 @@ import com.intellij.extapi.psi.StubBasedPsiElementBase;
 import test.stub.Element4Stub;
 import test.psi.*;
 import com.intellij.psi.stubs.IStubElementType;
+import org.jetbrains.annotations.ApiStatus.Experimental;
 import com.intellij.psi.tree.IElementType;
 
 public class Element4Impl extends StubBasedPsiElementBase<Element4Stub> implements Element4 {
 
   public Element4Impl(@NotNull Element4Stub stub, @NotNull IStubElementType<?, ?> type) {
+    super(stub, type);
+  }
+
+  public Element4Impl(@NotNull Element4Stub stub, @NotNull IElementType type) {
     super(stub, type);
   }
 

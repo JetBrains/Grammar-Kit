@@ -1370,7 +1370,7 @@ public final class JavaParserGenerator extends Generator {
     }
     if (!G.generateFQN) {
       for (NavigatablePsiElement m : constructors) {
-        collectMethodTypesToImport(Collections.singletonList(m), false, imports);
+        collectMethodTypesToImport(Collections.singletonList(m), false, true, imports);
       }
       if (stubName != null && constructors.isEmpty()) imports.add(G.fallbackStubElementType);
       if (stubName != null) imports.add(stubName);
@@ -1527,17 +1527,23 @@ public final class JavaParserGenerator extends Generator {
         myJavaHelper.findClassMethods(mixinClass, JavaHelper.MethodType.INSTANCE, methodInfo.name, -1);
       List<NavigatablePsiElement> implMethods = myJavaHelper.findRuleImplMethods(myPsiImplUtilClass, methodInfo.name, rule);
 
-      collectMethodTypesToImport(mixinMethods, false, result);
-      collectMethodTypesToImport(implMethods, true, result);
+      collectMethodTypesToImport(mixinMethods, false, false, result);
+      collectMethodTypesToImport(implMethods, true, false, result);
     }
     return result;
   }
 
-  private void collectMethodTypesToImport(@NotNull List<NavigatablePsiElement> methods, boolean isInPsiUtil, @NotNull Set<String> result) {
+  private void collectMethodTypesToImport(@NotNull List<NavigatablePsiElement> methods,
+                                          boolean isInPsiUtil,
+                                          boolean isConstructor,
+                                          @NotNull Set<String> result) {
     for (NavigatablePsiElement method : methods) {
       List<String> types = myJavaHelper.getMethodTypes(method);
       String returnType = ContainerUtil.getFirstItem(types);
-      addTypeToImports(returnType, myJavaHelper.getAnnotations(method), result);
+      // Method-level annotations of the mirrored constructor describe its declaring API rather than a
+      // contract the generated subclass inherits, so the emitter omits them and the import would go unused.
+      List<String> annotations = isConstructor ? emptyList() : myJavaHelper.getAnnotations(method);
+      addTypeToImports(returnType, annotations, result);
 
       for (TypeParameterInfo generic : myJavaHelper.getGenericParameters(method)) {
         for (String type : generic.getExtendsList()) {

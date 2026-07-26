@@ -271,7 +271,7 @@ public final class JavaParserGenerator extends Generator {
   private void generateVisitor(String psiClass, Map<String, BnfRule> sortedRules) {
     String superIntf = ObjectUtils.notNull(ContainerUtil.getFirstItem(getRootAttribute(myFile, KnownAttribute.IMPLEMENTS)),
                                            KnownAttribute.IMPLEMENTS.getDefaultValue().get(0)).second;
-    Set<String> imports = new LinkedHashSet<>(Arrays.asList("org.jetbrains.annotations.*", JavaBnfConstants.PSI_ELEMENT_VISITOR_CLASS, superIntf));
+    Set<String> imports = ContainerUtil.newLinkedHashSet("org.jetbrains.annotations.*", JavaBnfConstants.PSI_ELEMENT_VISITOR_CLASS, superIntf);
     MultiMap<String, String> supers = new MultiMap<>();
     for (BnfRule rule : sortedRules.values()) {
       supers.putValues(rule.getName(), getSuperInterfaceNames(myFile, rule, myPsiInterfaceFormat));
@@ -1685,7 +1685,7 @@ public final class JavaParserGenerator extends Generator {
         if (targetRule == null) {
           error = "'" + base + "' not found in '" + splitPath[i - 1] + "' (not a rule)";
         }
-        else if (available == null || available.isEmpty()) {
+        else if (ContainerUtil.isEmpty(available)) {
           error = "'" + base + "' not found in '" + targetRule.getName() + "' (available: nothing)";
         }
         else {

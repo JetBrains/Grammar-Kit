@@ -11,12 +11,15 @@ import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.psi.PsiElement;
+import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import com.intellij.util.containers.MultiMap;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.NodeCalls.*;
+import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.psi.*;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 import org.jetbrains.annotations.NotNull;
@@ -28,7 +31,10 @@ import java.util.*;
 
 import static java.lang.String.format;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.ConsumeType;
+import static org.intellij.grammar.generator.ParserGeneratorUtil.getRegexpTokenRegexp;
 import static org.intellij.grammar.generator.ParserGeneratorUtil.getTokenType;
+import static org.intellij.grammar.generator.ParserGeneratorUtil.isRegexpToken;
+import static org.intellij.grammar.generator.ParserGeneratorUtil.matchesAny;
 import static org.intellij.grammar.generator.RuleGraphHelper.hasElementType;
 import static org.intellij.grammar.psi.BnfAst.*;
 import static org.intellij.grammar.psi.BnfAttributes.getAttribute;
@@ -62,6 +68,8 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
   private FilePrinter myPrinter;
   protected final RuleGraphHelper myGraphHelper;
   protected final BnfFirstNextAnalyzer myFirstNextAnalyzer;
+  protected final ExpressionHelper myExpressionHelper;
+  protected final JavaHelper myJavaHelper;
 
   final @NotNull Map<String, RuleInfo> myRuleInfos = new TreeMap<>();
 
@@ -79,6 +87,11 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
    * 2.
    */
   protected final Map<String, String> mySimpleTokens;
+
+  /**
+   * Names of the tokens the grammar consumes, collected as consume calls are emitted.
+   */
+  protected final @NotNull Set<String> myTokensUsedInGrammar = new LinkedHashSet<>();
 
   /**
    * Maps field names to their corresponding parser function bodies.
@@ -118,13 +131,14 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
     myOutputFileExtension = outputFileExtension;
     myOpener = outputOpener;
 
-    List<BnfRule> rules = psiFile.getRules();
-    BnfRule rootRule = rules.isEmpty() ? null : rules.get(0);
+    BnfRule rootRule = ContainerUtil.getFirstItem(psiFile.getRules());
     myGrammarRoot = rootRule == null ? null : rootRule.getName();
     myGrammarRootParser = rootRule == null ? null : getRootAttribute(rootRule, KnownAttribute.PARSER_CLASS);
     mySimpleTokens = new LinkedHashMap<>(getTokenTextToNameMap(myFile));
     myGraphHelper = RuleGraphHelper.getCached(psiFile);
     myFirstNextAnalyzer = BnfFirstNextAnalyzer.createAnalyzer(true);
+    myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, this::addWarning);
+    myJavaHelper = JavaHelper.getJavaHelper(myFile);
   }
 
   public abstract void generate() throws IOException;
@@ -436,6 +450,46 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
   @NotNull String formatMetaParamName(@NotNull String s) {
     String argName = s.trim();
     return N.metaParamPrefix + (N.metaParamPrefix.isEmpty() || "_".equals(N.metaParamPrefix) ? argName : StringUtil.capitalize(argName));
+  }
+
+  protected final @NotNull List<String> collectMetaParametersFormatted(@NotNull BnfRule rule, @Nullable BnfExpression expression) {
+    if (expression == null) return Collections.emptyList();
+    return ContainerUtil.map(GrammarUtil.collectMetaParameters(rule, expression),
+                             it -> formatMetaParamName(it.substring(2, it.length() - 2)));
+  }
+
+  protected final @NotNull ConsumeType getRuleConsumeType(@NotNull BnfRule rule, @Nullable BnfRule contextRule) {
+    ConsumeType forcedConsumeType = ExpressionGeneratorHelper.fixForcedConsumeType(myExpressionHelper, rule, null, null);
+    if (forcedConsumeType != null && contextRule != null && myExpressionHelper.getExpressionInfo(contextRule) == null) {
+      // do not force child expr consume-type in a non-expr context
+      forcedConsumeType = null;
+    }
+    return ObjectUtils.chooseNotNull(forcedConsumeType, ConsumeType.forRule(rule));
+  }
+
+  protected final @NotNull ConsumeType getEffectiveConsumeType(@NotNull BnfRule rule,
+                                                               @Nullable BnfExpression node,
+                                                               @Nullable ConsumeType forcedConsumeType) {
+    if (forcedConsumeType == ConsumeType.DEFAULT) return ConsumeType.DEFAULT;
+    PsiElement parent = node == null ? null : node.getParent();
+
+    if (forcedConsumeType == null && parent instanceof BnfSequence &&
+        ContainerUtil.getFirstItem(((BnfSequence)parent).getExpressionList()) != node) {
+      Set<BnfExpression> expressions = BnfFirstNextAnalyzer.createAnalyzer(false, false, o -> o != parent)
+        .calcFirst((BnfExpression)parent);
+      if (expressions.size() != 1 || expressions.iterator().next() != node) {
+        return ConsumeType.DEFAULT;
+      }
+    }
+    ConsumeType fixed = ExpressionGeneratorHelper.fixForcedConsumeType(myExpressionHelper, rule, node, forcedConsumeType);
+    return fixed != null ? fixed : ConsumeType.forRule(rule);
+  }
+
+  protected final boolean isIgnoredWhitespaceToken(@NotNull String tokenName, @NotNull String tokenText) {
+    return isRegexpToken(tokenText) &&
+           !myTokensUsedInGrammar.contains(tokenName) &&
+           matchesAny(getRegexpTokenRegexp(tokenText), " ", "\n") &&
+           !matchesAny(getRegexpTokenRegexp(tokenText), "a", "1", "_", ".");
   }
 
   @NotNull

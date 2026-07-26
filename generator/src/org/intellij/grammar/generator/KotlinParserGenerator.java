@@ -67,15 +67,6 @@ public final class KotlinParserGenerator extends Generator {
 
   private final @NotNull Collection<String> mySGPRMethods = Arrays.asList("eof", "advanceToken");
 
-  /**
-   * Contains names of all the tokens whose corresponding {@code SyntaxElementType}
-   * definitions were generated.
-   */
-  private final @NotNull Set<String> myTokensUsedInGrammar = new LinkedHashSet<>();
-
-  private final ExpressionHelper myExpressionHelper;
-  private final JavaHelper myJavaHelper;
-
   public KotlinParserGenerator(@NotNull BnfFile psiFile,
                                @NotNull String sourcePath,
                                @NotNull String outputPath,
@@ -89,9 +80,6 @@ public final class KotlinParserGenerator extends Generator {
     myElementTypesHolderName = getRootAttribute(myFile, KnownAttribute.SYNTAX_ELEMENT_TYPE_HOLDER_CLASS);
     myParserUtil = getRootAttribute(myFile, KnownAttribute.SYNTAX_PARSER_UTIL_OBJECT);
     myPsiOutputPath = (psiOutputPath.isEmpty()) ? myOutputPath : psiOutputPath;
-
-    myExpressionHelper = new ExpressionHelper(myFile, myGraphHelper, this::addWarning);
-    myJavaHelper = JavaHelper.getJavaHelper(myFile);
 
     for (final var rule : psiFile.getRules()) {
       final var ruleName = rule.getName();
@@ -1051,21 +1039,6 @@ public final class KotlinParserGenerator extends Generator {
     return "{ %s, %s -> %s }".formatted(N.runtime, N.level, body);
   }
 
-  private @NotNull ConsumeType getRuleConsumeType(@NotNull BnfRule rule, @Nullable BnfRule contextRule) {
-    ConsumeType forcedConsumeType = ExpressionGeneratorHelper.fixForcedConsumeType(myExpressionHelper, rule, null, null);
-    if (forcedConsumeType != null && contextRule != null && myExpressionHelper.getExpressionInfo(contextRule) == null) {
-      // do not force child expr consume-type in a non-expr context
-      forcedConsumeType = null;
-    }
-    return ObjectUtils.chooseNotNull(forcedConsumeType, ConsumeType.forRule(rule));
-  }
-
-  private @NotNull List<String> collectMetaParametersFormatted(@NotNull BnfRule rule, @Nullable BnfExpression expression) {
-    if (expression == null) return Collections.emptyList();
-    return map(GrammarUtil.collectMetaParameters(rule, expression),
-               it -> formatMetaParamName(it.substring(2, it.length() - 2)));
-  }
-
   @Override
   @NotNull NodeCall generateTokenSequenceCall(@NotNull List<BnfExpression> children,
                                                     int startIndex,
@@ -1200,24 +1173,6 @@ public final class KotlinParserGenerator extends Generator {
     }
   }
 
-  private @NotNull ConsumeType getEffectiveConsumeType(@NotNull BnfRule rule,
-                                                       @Nullable BnfExpression node,
-                                                       @Nullable ConsumeType forcedConsumeType) {
-    if (forcedConsumeType == ConsumeType.DEFAULT) return ConsumeType.DEFAULT;
-    PsiElement parent = node == null ? null : node.getParent();
-
-    if (forcedConsumeType == null && parent instanceof BnfSequence &&
-        ContainerUtil.getFirstItem(((BnfSequence)parent).getExpressionList()) != node) {
-      Set<BnfExpression> expressions = BnfFirstNextAnalyzer.createAnalyzer(false, false, o -> o != parent)
-        .calcFirst((BnfExpression)parent);
-      if (expressions.size() != 1 || expressions.iterator().next() != node) {
-        return ConsumeType.DEFAULT;
-      }
-    }
-    ConsumeType fixed = ExpressionGeneratorHelper.fixForcedConsumeType(myExpressionHelper, rule, node, forcedConsumeType);
-    return fixed != null ? fixed : ConsumeType.forRule(rule);
-  }
-
   private @NotNull NodeCall generateExternalCall(@NotNull BnfRule rule,
                                                @NotNull List<BnfExpression> expressions,
                                                @NotNull String nextName) {
@@ -1251,13 +1206,6 @@ public final class KotlinParserGenerator extends Generator {
   }
 
   // region Utils
-
-  private boolean isIgnoredWhitespaceToken(@NotNull String tokenName, @NotNull String tokenText) {
-    return isRegexpToken(tokenText) &&
-           !myTokensUsedInGrammar.contains(tokenName) &&
-           matchesAny(getRegexpTokenRegexp(tokenText), " ", "\n") &&
-           !matchesAny(getRegexpTokenRegexp(tokenText), "a", "1", "_", ".");
-  }
 
   // endregion Utils
 }

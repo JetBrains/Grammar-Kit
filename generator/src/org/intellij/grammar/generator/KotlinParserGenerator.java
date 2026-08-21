@@ -1048,7 +1048,7 @@ public final class KotlinParserGenerator extends Generator {
    * a Parser lambda instance.
    */
   private @NotNull String buildParserInstance(@NotNull String body) {
-    return "{ %s, %s -> %s }".formatted(N.runtime, N.level, body);
+    return "Parser { %s, %s -> %s }".formatted(N.runtime, N.level, body);
   }
 
   private @NotNull ConsumeType getRuleConsumeType(@NotNull BnfRule rule, @Nullable BnfRule contextRule) {

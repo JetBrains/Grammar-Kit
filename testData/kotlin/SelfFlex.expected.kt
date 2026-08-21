@@ -2036,18 +2036,18 @@ object JFlexParser {
     return result
   }
 
-  internal val opt_code1_parser_: Parser = { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_CODE1) }
-  internal val opt_code2_parser_: Parser = { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_CODE2) }
-  internal val opt_eof1_parser_: Parser = { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_EOF1) }
-  internal val opt_eof2_parser_: Parser = { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_EOF2) }
-  internal val opt_eofthrow1_parser_: Parser = { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_EOFTHROW1) }
-  internal val opt_eofthrow2_parser_: Parser = { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_EOFTHROW2) }
-  internal val opt_eofval1_parser_: Parser = { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_EOFVAL1) }
-  internal val opt_eofval2_parser_: Parser = { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_EOFVAL2) }
-  internal val opt_init1_parser_: Parser = { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_INIT1) }
-  internal val opt_init2_parser_: Parser = { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_INIT2) }
-  internal val opt_initthrow1_parser_: Parser = { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_INITTHROW1) }
-  internal val opt_initthrow2_parser_: Parser = { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_INITTHROW2) }
-  internal val opt_yylexthrow1_parser_: Parser = { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_YYLEXTHROW1) }
-  internal val opt_yylexthrow2_parser_: Parser = { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_YYLEXTHROW2) }
+  internal val opt_code1_parser_: Parser = Parser { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_CODE1) }
+  internal val opt_code2_parser_: Parser = Parser { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_CODE2) }
+  internal val opt_eof1_parser_: Parser = Parser { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_EOF1) }
+  internal val opt_eof2_parser_: Parser = Parser { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_EOF2) }
+  internal val opt_eofthrow1_parser_: Parser = Parser { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_EOFTHROW1) }
+  internal val opt_eofthrow2_parser_: Parser = Parser { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_EOFTHROW2) }
+  internal val opt_eofval1_parser_: Parser = Parser { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_EOFVAL1) }
+  internal val opt_eofval2_parser_: Parser = Parser { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_EOFVAL2) }
+  internal val opt_init1_parser_: Parser = Parser { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_INIT1) }
+  internal val opt_init2_parser_: Parser = Parser { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_INIT2) }
+  internal val opt_initthrow1_parser_: Parser = Parser { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_INITTHROW1) }
+  internal val opt_initthrow2_parser_: Parser = Parser { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_INITTHROW2) }
+  internal val opt_yylexthrow1_parser_: Parser = Parser { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_YYLEXTHROW1) }
+  internal val opt_yylexthrow2_parser_: Parser = Parser { runtime, level -> runtime.consumeToken(JFlexTypes.FLEX_OPT_YYLEXTHROW2) }
 }

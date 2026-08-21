@@ -93,5 +93,5 @@ object To {
     return result_
   }
 
-  internal val grant_tail_0_0_parser_: Parser = { runtime_, level_ -> to__(runtime_, level_ + 1) }
+  internal val grant_tail_0_0_parser_: Parser = Parser { runtime_, level_ -> to__(runtime_, level_ + 1) }
 }

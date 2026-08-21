@@ -16,8 +16,8 @@ import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.analysis.BnfFirstNextAnalyzer;
 import org.intellij.grammar.generator.NodeCalls.*;
 import org.intellij.grammar.generator.kotlin.KotlinBnfConstants;
-import org.intellij.grammar.generator.kotlin.KotlinNameShortener;
 import org.intellij.grammar.generator.kotlin.KotlinNameRenderer;
+import org.intellij.grammar.generator.kotlin.KotlinNameShortener;
 import org.intellij.grammar.java.JavaHelper;
 import org.intellij.grammar.parser.GeneratedParserUtilBase.Parser;
 import org.intellij.grammar.psi.*;
@@ -966,7 +966,7 @@ public final class KotlinParserGenerator extends Generator {
       for (final var elementType : sortedCompositeTypes) {
         var factory = typeToFactoryMap.getOrDefault(elementType, null);
         if (factory != null){
-          var createCall = shorten(StringUtil.getPackageName(factory)) + "." + StringUtil.getShortName(factory); 
+          var createCall = nameShortener.shorten(StringUtil.getPackageName(factory)) + "." + StringUtil.getShortName(factory);
           out("val %s = %s(\"%s\")", elementType, createCall, elementType);
         }
         else {
@@ -1048,7 +1048,7 @@ public final class KotlinParserGenerator extends Generator {
    * a Parser lambda instance.
    */
   private @NotNull String buildParserInstance(@NotNull String body) {
-    return "{ %s, %s -> %s }".formatted(N.runtime, N.level, body);
+    return "Parser { %s, %s -> %s }".formatted(N.runtime, N.level, body);
   }
 
   private @NotNull ConsumeType getRuleConsumeType(@NotNull BnfRule rule, @Nullable BnfRule contextRule) {

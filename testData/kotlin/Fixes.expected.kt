@@ -276,7 +276,7 @@ object Fixes {
 
   /* ********************************************************** */
   internal fun meta2__(p: Parser, q: Parser): Parser {
-    return { runtime_, level_ -> meta2(runtime_, level_ + 1, p, q) }
+    return Parser { runtime_, level_ -> meta2(runtime_, level_ + 1, p, q) }
   }
 
   // <<p>> <<q>>

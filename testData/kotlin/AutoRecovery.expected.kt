@@ -144,5 +144,5 @@ object GeneratedParser {
     return result_ || pinned_
   }
 
-  internal val item_auto_recover_: Parser = { runtime_, level_ -> !runtime_.nextTokenIsFast(GeneratedSyntaxElementTypes.PAREN2, GeneratedSyntaxElementTypes.COMMA, GeneratedSyntaxElementTypes.SEMI) }
+  internal val item_auto_recover_: Parser = Parser { runtime_, level_ -> !runtime_.nextTokenIsFast(GeneratedSyntaxElementTypes.PAREN2, GeneratedSyntaxElementTypes.COMMA, GeneratedSyntaxElementTypes.SEMI) }
 }

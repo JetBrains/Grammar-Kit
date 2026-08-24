@@ -34,7 +34,7 @@ See also [Custom Language Support Tutorial](https://plugins.jetbrains.com/docs/i
 
 General usage instructions
 --------------------------
-1. Create grammar \*.bnf file, see [Grammar.bnf](grammars/Grammar.bnf) in the plugin code.
+1. Create grammar \*.bnf file, see [Grammar.bnf](bnf-language/grammars/Grammar.bnf) in the plugin code.
 2. Tune the grammar using _Live Preview_ + Structure view (Ctrl-Alt-P / Cmd-Alt-P)
 3. Generate parser/ElementTypes/PSI classes (Ctrl-Shift-G / Cmd-Shift-G)
 4. Generate lexer \*.flex file and then run JFlex generator (both via context menu) 

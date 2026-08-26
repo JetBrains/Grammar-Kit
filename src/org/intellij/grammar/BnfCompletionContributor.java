@@ -163,8 +163,8 @@ final class BnfCompletionContributor extends CompletionContributor {
   }
 
   private static boolean isLastInRuleOrFree(PsiElement element) {
-    PsiElement parent = PsiTreeUtil.getParentOfType(element, BnfRule.class, GeneratedParserUtilBase.DummyBlock.class);
-    if (parent instanceof GeneratedParserUtilBase.DummyBlock) return true;
+    PsiElement parent = PsiTreeUtil.getParentOfType(element, BnfRule.class, DummyBlockType.DummyBlock.class);
+    if (parent instanceof DummyBlockType.DummyBlock) return true;
     if (!(parent instanceof BnfRule)) return false;
     for (PsiElement cur = element, next = cur.getNextSibling();
          next == null || next instanceof PsiComment || next instanceof PsiWhiteSpace;

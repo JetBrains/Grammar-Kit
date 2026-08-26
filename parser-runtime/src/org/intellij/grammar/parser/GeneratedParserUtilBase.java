@@ -81,6 +81,14 @@ public class GeneratedParserUtilBase {
 
   public static final IElementType DUMMY_BLOCK = DummyBlockType.DUMMY_BLOCK;
 
+  /**
+   * Number of same-rated siblings {@link #parseAsTree} groups under one {@link #DUMMY_BLOCK} node.
+   *
+   * <p>Chunking keeps the tree shallow for long flat sequences, so {@code DUMMY_BLOCK} nodes appear between
+   * a sequence and its items.
+   */
+  public static final int MAX_CHILDREN_IN_TREE = 10;
+
   public interface Parser {
     boolean parse(PsiBuilder builder, int level);
   }
@@ -1125,7 +1133,6 @@ public class GeneratedParserUtilBase {
   }
 
 
-  private static final int MAX_CHILDREN_IN_TREE = 10;
   private static void checkSiblings(IElementType chunkType,
                                     Deque<Pair<PsiBuilder.Marker, PsiBuilder.Marker>> parens,
                                     Deque<Pair<PsiBuilder.Marker, Integer>> siblings) {

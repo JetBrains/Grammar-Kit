@@ -4,6 +4,7 @@ import com.intellij.codeInsight.completion.CompletionType;
 import com.intellij.testFramework.UsefulTestCase;
 import com.intellij.testFramework.fixtures.CodeInsightTestFixture;
 import com.intellij.testFramework.fixtures.JavaCodeInsightFixtureTestCase;
+import org.intellij.grammar.parser.GeneratedParserUtilBase;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -27,6 +28,9 @@ public class BnfCompletionTest extends JavaCodeInsightFixtureTestCase {
   public void testKeywords7() { variants("pr<caret>rule::=", INCLUDES, "private"); }
   public void testKeywords8() { variants("rule::=\npr<caret>rule::=", INCLUDES, "private"); }
   public void testKeywordsNotInComments() { variants("root ::= //rule ::= p<caret>", EXCLUDES, "public", "private"); }
+  // parseGrammar wraps a full chunk of top-level rules into a DUMMY_BLOCK, so the free position after it
+  // is reached through GrammarUtil.getDummyAwarePrevSibling
+  public void testKeywordsInChunkedGrammar() { variants(rules(GeneratedParserUtilBase.MAX_CHILDREN_IN_TREE) + "<caret>", INCLUDES, "private", "meta"); }
 
   public void testAttr1() { variants("{<caret>}", INCLUDES, "pin"); }
   public void testAttr2() { variants("{<caret>}", INCLUDES, "pin"); }
@@ -54,6 +58,14 @@ public class BnfCompletionTest extends JavaCodeInsightFixtureTestCase {
                                                INCLUDES, "eofX", "eofY", "metaR"); }
   public void testExternalMethod6() { variants(initUtil() + "root ::= rule ::= <<<caret> >>",
                                                EXCLUDES, "root"); }
+
+  private static String rules(int count) {
+    StringBuilder sb = new StringBuilder();
+    for (int i = 0; i < count; i++) {
+      sb.append("r").append(i).append(" ::= a;\n");
+    }
+    return sb.toString();
+  }
 
   private String initUtil() {
     myFixture.addClass("public class X { public static boolean eofX(com.intellij.lang.PsiBuilder b, int l) { } }");

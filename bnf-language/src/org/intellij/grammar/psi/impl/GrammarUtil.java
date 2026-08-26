@@ -8,6 +8,7 @@ import com.intellij.lang.Language;
 import com.intellij.openapi.util.Conditions;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.psi.DummyBlockType;
 import com.intellij.psi.PsiElement;
 import com.intellij.psi.PsiElementVisitor;
 import com.intellij.psi.SyntaxTraverser;
@@ -44,12 +45,12 @@ public class GrammarUtil {
 
   public static PsiElement getDummyAwarePrevSibling(PsiElement child) {
     PsiElement prevSibling = child.getPrevSibling();
-    while (prevSibling instanceof GeneratedParserUtilBase.DummyBlock) {
+    while (prevSibling instanceof DummyBlockType.DummyBlock) {
       prevSibling = prevSibling.getLastChild();
     }
     if (prevSibling != null) return prevSibling;
     PsiElement parent = child.getParent();
-    while (parent instanceof GeneratedParserUtilBase.DummyBlock && parent.getPrevSibling() == null) {
+    while (parent instanceof DummyBlockType.DummyBlock && parent.getPrevSibling() == null) {
       parent = parent.getParent();
     }
     return parent == null ? null : parent.getPrevSibling();

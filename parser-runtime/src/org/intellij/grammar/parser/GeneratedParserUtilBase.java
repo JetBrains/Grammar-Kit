@@ -1238,6 +1238,12 @@ public class GeneratedParserUtilBase {
   }
 
 
+  /**
+   * Retained for source compatibility since {@code DUMMY_BLOCK} moved to the platform.
+   *
+   * <p>Nothing instantiates this class: {@link DummyBlockType#DUMMY_BLOCK} builds
+   * {@link DummyBlockType.DummyBlock} nodes, so test against that class, not this one.
+   */
   public static class DummyBlock extends DummyBlockType.DummyBlock{}
 
   private static class MyList<E> extends ArrayList<E> {

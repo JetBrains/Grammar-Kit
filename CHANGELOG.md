@@ -5,9 +5,9 @@
 * Parser runtime: render token-set `consumeToken`/`consumeTokenSmart(TokenSet)` expected and completion variants by token name instead of a raw `IElementType[]` toString
 * **Compatibility: the minimum supported IDE is now 2025.2 (build 252).** Use Grammar-Kit 2023.3.4 for 2023.3–2025.1.
 * Parser runtime: do not extend a collapsed marker during error recovery. `getLatestExtensibleDoneMarker` now skips collapsed markers, so successive tokens are no longer merged into a non-composite marker. This aligns Live Preview with the IntelliJ Platform copy of `GeneratedParserUtilBase`, which has behaved this way since 2023.1; the check needs an API only available from 252, which is what sets the new floor.
-* Parser runtime: `DUMMY_BLOCK` now reuses the platform's `com.intellij.psi.DummyBlockType` instead of a private copy, and marker access goes through the `PsiBuilder.Marker` interface instead of downcasting to `PsiBuilderImpl`.
+* Parser runtime: `DUMMY_BLOCK` now reuses the platform's `com.intellij.psi.DummyBlockType` instead of a private copy, and marker access goes through the `PsiBuilder.Marker` interface instead of downcasting to `PsiBuilderImpl`. `GeneratedParserUtilBase.DummyBlock` is deprecated for removal.
 * Parser runtime: `MAX_CHILDREN_IN_TREE`, the `DUMMY_BLOCK` chunk size, is now public, so tree-walking code no longer hardcodes it.
-* BNF completion: keyword and attribute completion now test dummy blocks against the platform's `DummyBlockType.DummyBlock`. Nothing instantiates the `GeneratedParserUtilBase` subclass they tested before, so the checks never matched in grammars of ten or more top-level items.
+* BNF completion: keyword and attribute completion now test dummy blocks against the platform's `DummyBlockType.DummyBlock`.
 * Generator: drop the unused annotation import that generated PSI impls picked up from an annotated superclass constructor.
 
 ## [2023.3.4]

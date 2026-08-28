@@ -13,12 +13,14 @@ import org.intellij.grammar.parser.GeneratedParserUtilBase;
 import org.intellij.grammar.psi.BnfRule;
 import org.intellij.grammar.psi.impl.GrammarUtil;
 
+import java.util.ArrayList;
+import java.util.List;
+
 public class GrammarUtilTest extends BasePlatformTestCase {
 
   public void testPrevSiblingDescendsIntoDummyBlock() {
-    PsiFile file = configureChunkedGrammar();
-    PsiElement trailing = file.getLastChild();
-    assertInstanceOf(trailing, PsiWhiteSpace.class);
+    PsiFile file = configureChunkedGrammar(GeneratedParserUtilBase.MAX_CHILDREN_IN_TREE);
+    PsiElement trailing = assertInstanceOf(file.getLastChild(), PsiWhiteSpace.class);
     // The parser builds the platform class; nothing instantiates GeneratedParserUtilBase.DummyBlock
     assertInstanceOf(trailing.getPrevSibling(), DummyBlockType.DummyBlock.class);
 
@@ -27,10 +29,28 @@ public class GrammarUtilTest extends BasePlatformTestCase {
     assertEquals("r" + (GeneratedParserUtilBase.MAX_CHILDREN_IN_TREE - 1), assertInstanceOf(prev, BnfRule.class).getName());
   }
 
-  /** Configures a grammar of exactly one chunk, so every top-level rule sits inside a {@code DUMMY_BLOCK}. */
-  private PsiFile configureChunkedGrammar() {
+  public void testPrevSiblingCrossesChunkBoundaries() {
+    int ruleCount = 2 * GeneratedParserUtilBase.MAX_CHILDREN_IN_TREE * GeneratedParserUtilBase.MAX_CHILDREN_IN_TREE;
+    PsiFile file = configureChunkedGrammar(ruleCount);
+    PsiElement trailing = assertInstanceOf(file.getLastChild(), PsiWhiteSpace.class);
+    // Enough rules that chunks nest, so the walk below crosses both a plain and a nested chunk start
+    assertInstanceOf(trailing.getPrevSibling().getLastChild(), DummyBlockType.DummyBlock.class);
+
+    List<String> visited = new ArrayList<>();
+    for (PsiElement cur = GrammarUtil.getDummyAwarePrevSibling(trailing); cur != null;
+         cur = GrammarUtil.getDummyAwarePrevSibling(cur)) {
+      if (cur instanceof BnfRule) visited.add(((BnfRule)cur).getName());
+    }
+
+    List<String> expected = new ArrayList<>();
+    for (int i = ruleCount - 1; i >= 0; i--) expected.add("r" + i);
+    assertEquals(expected, visited);
+  }
+
+  /** Configures a grammar of {@code ruleCount} rules, chunked into groups of {@link GeneratedParserUtilBase#MAX_CHILDREN_IN_TREE}. */
+  private PsiFile configureChunkedGrammar(int ruleCount) {
     StringBuilder text = new StringBuilder();
-    for (int i = 0; i < GeneratedParserUtilBase.MAX_CHILDREN_IN_TREE; i++) {
+    for (int i = 0; i < ruleCount; i++) {
       text.append("r").append(i).append(" ::= a;\n");
     }
     return myFixture.configureByText("a.bnf", text.toString());

@@ -8,6 +8,7 @@
 * Parser runtime: `DUMMY_BLOCK` now reuses the platform's `com.intellij.psi.DummyBlockType` instead of a private copy, and marker access goes through the `PsiBuilder.Marker` interface instead of downcasting to `PsiBuilderImpl`. `GeneratedParserUtilBase.DummyBlock` is deprecated for removal.
 * Parser runtime: `MAX_CHILDREN_IN_TREE`, the `DUMMY_BLOCK` chunk size, is now public, so tree-walking code no longer hardcodes it.
 * BNF completion: keyword and attribute completion now test dummy blocks against the platform's `DummyBlockType.DummyBlock`.
+* BNF completion: `getDummyAwarePrevSibling` now unwraps a `DUMMY_BLOCK` reached by climbing to a parent boundary, not just one found as a direct sibling, so keyword completion in grammars of twenty or more top-level items resumes after the last rule instead of re-parsing from the start of the file.
 * Generator: drop the unused annotation import that generated PSI impls picked up from an annotated superclass constructor.
 
 ## [2023.3.4]

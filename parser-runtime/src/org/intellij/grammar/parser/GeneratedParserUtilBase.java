@@ -67,6 +67,8 @@ import static com.intellij.openapi.util.text.StringUtil.trim;
  *
  * @author gregsh
  */
+// Generated parsers call this API, and they live outside this project, so unused-declaration reports on it are noise.
+@SuppressWarnings("unused")
 public class GeneratedParserUtilBase {
   private static final Logger LOG = Logger.getInstance(GeneratedParserUtilBase.class);
 
@@ -136,7 +138,6 @@ public class GeneratedParserUtilBase {
   };
 
 
-  @SuppressWarnings("unused")
   public static boolean eof(PsiBuilder builder, int level) {
     return builder.eof();
   }
@@ -570,11 +571,11 @@ public class GeneratedParserUtilBase {
     if (elementType != null && marker == null) {
       builder.mark().error("No expected done marker at offset " + builder.getCurrentOffset());
     }
-    while (state.hooks != null && state.hooks.level >= state.level) {
-      if (state.hooks.level == state.level) {
-        marker = ((Hook<Object>)state.hooks.hook).run(builder, marker, state.hooks.param);
+    while (state.hooks != null && state.hooks.level() >= state.level) {
+      if (state.hooks.level() == state.level) {
+        marker = ((Hook<Object>)state.hooks.hook()).run(builder, marker, state.hooks.param());
       }
-      state.hooks = state.hooks.next;
+      state.hooks = state.hooks.next();
     }
   }
 
@@ -1126,7 +1127,7 @@ public class GeneratedParserUtilBase {
     }
   }
 
-  private record Hooks<T>(Hook<T> hook, T param, int level, Hooks next) {
+  private record Hooks<T>(Hook<T> hook, T param, int level, Hooks<?> next) {
     static <E> Hooks<E> concat(Hook<E> hook, E param, int level, Hooks<?> hooks) {
       return new Hooks<>(hook, param, level, hooks);
     }

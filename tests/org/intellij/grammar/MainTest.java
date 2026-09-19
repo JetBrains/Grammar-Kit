@@ -182,6 +182,44 @@ public class MainTest extends TestCase {
     assertFalse("Grammar decoded with the wrong charset:\n" + text, text.contains("\u00c2"));
   }
 
+  public void testRunAcceptsHostSeparatorPaths() throws Exception {
+    File inputDir = FileUtilRt.createTempDirectory("main-test-in", null, true);
+    File output = FileUtilRt.createTempDirectory("main-test-out", null, true);
+    FileUtil.writeToFile(new File(inputDir, "Grammar.bnf"),
+                         "{ parserClass=\"com.example.TestParser\" }\nroot ::= 'x'");
+
+    // on Windows this is a backslash path, which File.separator-only splitting handled, while the
+    // forward-slash form the other tests use - and that build scripts produce - did not
+    String grammar = inputDir.getPath() + File.separator + "Grammar.bnf";
+    assertEquals(0, Main.run(new String[]{output.getAbsolutePath(), grammar}));
+    assertNotNull("Expected TestParser.java under " + output, findFile(output, "TestParser.java"));
+  }
+
+  public void testRunWildcardProcessesGrammarsInStableOrder() throws Exception {
+    File inputDir = FileUtilRt.createTempDirectory("main-test-in", null, true);
+    File output = FileUtilRt.createTempDirectory("main-test-out", null, true);
+    FileUtil.writeToFile(new File(inputDir, "B.bnf"), "{ parserClass=\"com.example.BParser\" }\nroot ::= 'b'");
+    FileUtil.writeToFile(new File(inputDir, "A.bnf"), "{ parserClass=\"com.example.AParser\" }\nroot ::= 'a'");
+    FileUtil.writeToFile(new File(inputDir, "C.bnf"), "{ parserClass=\"com.example.CParser\" }\nroot ::= 'c'");
+
+    assertEquals(0, Main.run(new String[]{output.getAbsolutePath(), inputDir + "/*.bnf"}));
+
+    String out = stdOut();
+    int a = out.indexOf("A.bnf"), b = out.indexOf("B.bnf"), c = out.indexOf("C.bnf");
+    // all three must actually be there: a missing grammar reports -1, which would satisfy a bare
+    // a < b < c comparison
+    assertTrue("Not every grammar was processed:\n" + out, a >= 0 && b >= 0 && c >= 0);
+    assertTrue("Grammars not processed in name order:\n" + out, a < b && b < c);
+  }
+
+  public void testRunRootRelativePathResolvesToFilesystemRoot() {
+    // "/Grammar.bnf" leaves an empty directory part, which used to resolve to the working
+    // directory; the run must look at the filesystem root instead (and find nothing there)
+    File output = new File(FileUtilRt.getTempDirectory(), "main-test-root-out");
+    assertEquals(0, Main.run(new String[]{output.getAbsolutePath(), File.separator + "NoSuchGrammar.bnf"}));
+    assertContains(stdOut(), "No grammars matching 'NoSuchGrammar.bnf' found in: " + File.separator);
+  }
+
   /**
    * A grammar carrying a byte order mark is decoded by that mark, not by the UTF-8 default, and
    * the mark itself does not survive into the generated sources.

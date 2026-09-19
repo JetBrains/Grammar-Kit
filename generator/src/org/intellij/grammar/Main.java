@@ -16,6 +16,7 @@ import org.jetbrains.annotations.NotNull;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.Comparator;
 import java.util.List;
 import java.util.regex.Pattern;
 import java.util.stream.Stream;
@@ -133,6 +134,8 @@ public class Main {
       if (files == null) return List.of();
 
       return Stream.of(files)
+        // listFiles() order is filesystem-dependent; generate in a stable order instead
+        .sorted(Comparator.comparing(File::getName))
         .filter(f -> !f.isDirectory() && grammarPattern.matcher(f.getName()).matches())
         .toList();
     }
@@ -142,11 +145,29 @@ public class Main {
     }
 
     static @NotNull Main.GrammarPattern of(@NotNull String grammar) {
-      int idx = grammar.lastIndexOf(File.separator);
-      File grammarDir = new File(idx >= 0 ? grammar.substring(0, idx) : ".");
+      // '/' as well as the host separator: build scripts routinely hand Windows paths with
+      // forward slashes, which the OS accepts but File.separator alone would not recognize.
+      int idx = Math.max(grammar.lastIndexOf('/'), grammar.lastIndexOf(File.separatorChar));
+      File grammarDir = new File(idx >= 0 ? directoryOf(grammar.substring(0, idx)) : ".");
       String wildCard = idx >= 0 ? grammar.substring(idx + 1) : grammar;
       Pattern grammarPattern = Pattern.compile(convertToJavaPattern(wildCard));
       return new GrammarPattern(grammarDir, grammarPattern, wildCard);
+    }
+
+    /**
+     * Turns the part of the argument before the last separator into a directory that means what
+     * it says. Everything the separator scan leaves behind is already a directory except the two
+     * roots: {@code /Grammar.bnf} leaves {@code ""}, which resolves to the working directory
+     * rather than to the filesystem root, and {@code C:/Grammar.bnf} leaves {@code "C:"}, which
+     * on Windows is the current directory <em>on drive C</em> rather than the drive root.
+     * (On other systems {@code "C:"} is an ordinary relative name, and appending a separator
+     * still names the same directory.)
+     */
+    private static @NotNull String directoryOf(@NotNull String prefix) {
+      if (prefix.isEmpty()) return File.separator;
+      return prefix.length() == 2 && prefix.charAt(1) == ':' && Character.isLetter(prefix.charAt(0))
+             ? prefix + File.separator
+             : prefix;
     }
 
     private static @NotNull String convertToJavaPattern(@NotNull String wildcardPattern) {

@@ -23,7 +23,6 @@ import org.jetbrains.annotations.Nullable;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
@@ -225,8 +224,8 @@ public class BnfGeneratorPsiTest extends BasePlatformTestCase {
         //noinspection ResultOfMethodCallIgnored
         outputFile.getParentFile().mkdirs();
         FileOutputStream outputStream = new FileOutputStream(outputFile, true);
-        PrintWriter out = new PrintWriter(new OutputStreamWriter(outputStream, myBnfFile.getVirtualFile().getCharset()));
-        out.println("// ---- " + file.getName() + " -----------------");
+        OutputStreamWriter out = new OutputStreamWriter(outputStream, myBnfFile.getVirtualFile().getCharset());
+        out.write("// ---- " + file.getName() + " -----------------\n");
         return out;
       }
       return OutputOpener.DEFAULT.openOutput(className, file, myBnfFile);

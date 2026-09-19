@@ -162,7 +162,9 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
   private String getStringOrFile(String classHeader) {
     try {
       File file = new File(mySourcePath, classHeader);
-      if (file.exists()) return FileUtil.loadFile(file);
+      // convertLineSeparators: out() splits on '\n' only, so a CRLF header file would otherwise
+      // leave a stray '\r' at the end of every header line of every generated file.
+      if (file.exists()) return StringUtil.convertLineSeparators(FileUtil.loadFile(file));
     }
     catch (IOException ex) {
       LOG.error(ex);

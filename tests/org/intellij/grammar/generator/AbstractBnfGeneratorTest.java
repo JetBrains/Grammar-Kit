@@ -41,8 +41,8 @@ public abstract class AbstractBnfGeneratorTest extends BnfGeneratorTestCase {
       final var targetFile = new File(FileUtilRt.getTempDirectory(), name);
       targetFile.getParentFile().mkdirs();
       final var outputStream = new FileOutputStream(targetFile, true);
-      final var out = new PrintWriter(new OutputStreamWriter(outputStream, myBnfFile.getVirtualFile().getCharset()));
-      out.println("// ---- " + FileUtil.getRelativePath(new File(myFullDataPath), fileToOpen.getAbsoluteFile()) + " -----------------");
+      final var out = new OutputStreamWriter(outputStream, myBnfFile.getVirtualFile().getCharset());
+      out.write("// ---- " + FileUtil.getRelativePath(new File(myFullDataPath), fileToOpen.getAbsoluteFile()) + " -----------------\n");
       return out;
     };
   }

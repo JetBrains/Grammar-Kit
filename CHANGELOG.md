@@ -10,6 +10,7 @@
 * BNF completion: keyword and attribute completion now test dummy blocks against the platform's `DummyBlockType.DummyBlock`.
 * BNF completion: `getDummyAwarePrevSibling` now unwraps a `DUMMY_BLOCK` reached by climbing to a parent boundary, not just one found as a direct sibling, so keyword completion in grammars of twenty or more top-level items resumes after the last rule instead of re-parsing from the start of the file.
 * Generator: drop the unused annotation import that generated PSI impls picked up from an annotated superclass constructor.
+* Generator: generated sources are written with `\n` on every platform, and a CRLF grammar or `classHeader` file no longer inserts a blank line after every `// rule expression` comment [#468](https://github.com/JetBrains/Grammar-Kit/issues/468)
 
 ## [2023.3.4]
 

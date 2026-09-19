@@ -7,6 +7,7 @@ package org.intellij.grammar.generator;
 import junit.framework.TestCase;
 
 import java.io.StringWriter;
+import java.util.Locale;
 import java.util.function.Consumer;
 
 /**
@@ -33,6 +34,18 @@ public class FilePrinterTest extends TestCase {
       p.out("return;");
       p.out("}");
     }));
+  }
+
+  public void testFormattedNumbersAreLocaleIndependent() {
+    Locale previous = Locale.getDefault();
+    try {
+      // a locale whose default numbering system is Devanagari, not Latin
+      Locale.setDefault(new Locale.Builder().setLanguage("hi").setRegion("IN").setUnicodeLocaleKeyword("nu", "deva").build());
+      assertEquals("f(b, 42, X);\n", print(p -> p.out("%s(%s, %d, %s);", "f", "b", 42, "X")));
+    }
+    finally {
+      Locale.setDefault(previous);
+    }
   }
 
   private static String print(Consumer<FilePrinter> consumer) {

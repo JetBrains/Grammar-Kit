@@ -11,6 +11,7 @@
 * Generator: drop the unused annotation import that generated PSI impls picked up from an annotated superclass constructor.
 * Generator: generated sources are written with `\n` on every platform, and a CRLF grammar or `classHeader` file no longer inserts a blank line after every `// rule expression` comment [#468](https://github.com/JetBrains/Grammar-Kit/issues/468)
 * Generator: grammar and `classHeader` files are decoded by their byte order mark, else as UTF-8, and generated files are encoded to match. Standalone (CLI/Gradle) runs previously followed the JVM default charset, so a non-ASCII grammar produced different bytes on different hosts and a UTF-16 grammar could not be read at all
+* Generator: case conversion and number formatting are locale-independent, so generated code no longer varies with the default locale (Turkish `i`/`I`, non-Latin digit systems). Also fixes JFlex keyword completion and the Live Preview token lookup
 
 ## [2023.3.4]
 

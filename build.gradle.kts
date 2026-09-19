@@ -215,7 +215,6 @@ tasks {
         useJUnit()
         include("**/BnfTestSuite.class")
         isScanForTestClasses = false
-        ignoreFailures = true
         dependsOn("testMain")
     }
 
@@ -341,7 +340,6 @@ intellijPlatformTesting {
             useJUnit()
             include("**/MainTest.class")
             isScanForTestClasses = false
-            ignoreFailures = true
             testClassesDirs = files(layout.buildDirectory.dir("instrumented/instrumentTestCode"))
         }
         sandboxDirectory = layout.buildDirectory.dir("testMain-sandbox")

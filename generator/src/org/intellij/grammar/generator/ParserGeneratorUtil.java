@@ -420,7 +420,7 @@ public class ParserGeneratorUtil {
     }
 
     public @NotNull String getMethodSuffix() {
-      return this == DEFAULT ? "" : StringUtil.capitalize(name().toLowerCase());
+      return this == DEFAULT ? "" : StringUtil.capitalize(StringUtil.toLowerCase(name()));
     }
 
     public @NotNull String getMethodName() {

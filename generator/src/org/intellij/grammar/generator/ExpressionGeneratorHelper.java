@@ -121,7 +121,7 @@ public class ExpressionGeneratorHelper {
                                                                             R.getNextName(R.getFuncName(operator.rule()), 1), 
                                                                             ConsumeType.DEFAULT).render(R);
       if (operator.type() == OperatorType.BINARY) {
-        String argCall = format("%s(%s, %s, %d)", methodName, g.N.builder, g.N.level, rightAssociative ? argPriority - 1 : argPriority);
+        String argCall = format(Locale.ROOT, "%s(%s, %s, %d)", methodName, g.N.builder, g.N.level, rightAssociative ? argPriority - 1 : argPriority);
         g.out("%s = %s;", g.N.result, tailCall == null ? argCall : format("report_error_(%s, %s)", g.N.builder, argCall));
         if (tailCall != null) g.out("%s = %s && %s;", g.N.result, tailCall, g.N.result);
       }

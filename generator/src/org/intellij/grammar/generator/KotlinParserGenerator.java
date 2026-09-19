@@ -665,7 +665,7 @@ public final class KotlinParserGenerator extends Generator {
         operator.rule(), operator.tail(), R.getNextName(R.getFuncName(operator.rule()), 1), ConsumeType.DEFAULT
       ).render(R);
       if (operator.type() == OperatorType.BINARY) {
-        String argCall = format("%s(%s, %s, %d)", methodName, N.runtime, N.level, rightAssociative ? argPriority - 1 : argPriority);
+        String argCall = format(Locale.ROOT, "%s(%s, %s, %d)", methodName, N.runtime, N.level, rightAssociative ? argPriority - 1 : argPriority);
         out("%s = %s", N.result, tailCall == null ? argCall : format("%s.report_error_(%s)", N.runtime, argCall));
         if (tailCall != null) out("%s = %s && %s", N.result, tailCall, N.result);
       }

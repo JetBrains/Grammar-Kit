@@ -11,6 +11,7 @@ import com.intellij.openapi.ui.MessageType;
 import com.intellij.openapi.util.Ref;
 import com.intellij.openapi.util.io.FileUtil;
 import com.intellij.openapi.util.text.StringUtil;
+import com.intellij.openapi.vfs.CharsetToolkit;
 import com.intellij.psi.PsiElement;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.containers.ContainerUtil;
@@ -162,9 +163,14 @@ public sealed abstract class Generator permits JavaParserGenerator, KotlinParser
   private String getStringOrFile(String classHeader) {
     try {
       File file = new File(mySourcePath, classHeader);
-      // convertLineSeparators: out() splits on '\n' only, so a CRLF header file would otherwise
-      // leave a stray '\r' at the end of every header line of every generated file.
-      if (file.exists()) return StringUtil.convertLineSeparators(FileUtil.loadFile(file));
+      // bytesToString: a BOM if the file has one, otherwise the grammar's own charset - the same
+      // one the output is written with, UTF-8 standalone and the project encoding in the IDE.
+      // convertLineSeparators because out() splits on '\n' only, so a CRLF header file would
+      // otherwise leave a stray '\r' at the end of every header line of every generated file.
+      if (file.exists()) {
+        byte[] bytes = FileUtil.loadFileBytes(file);
+        return StringUtil.convertLineSeparators(CharsetToolkit.bytesToString(bytes, myFile.getVirtualFile().getCharset()));
+      }
     }
     catch (IOException ex) {
       LOG.error(ex);

@@ -340,6 +340,9 @@ intellijPlatformTesting {
             useJUnit()
             include("**/MainTest.class")
             isScanForTestClasses = false
+            // Deliberately not UTF-8: standalone generation must not depend on the JVM default
+            // charset, so the CLI tests run under one that would expose it.
+            systemProperty("file.encoding", "ISO-8859-1")
             testClassesDirs = files(layout.buildDirectory.dir("instrumented/instrumentTestCode"))
         }
         sandboxDirectory = layout.buildDirectory.dir("testMain-sandbox")

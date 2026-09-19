@@ -11,6 +11,8 @@ import junit.framework.TestCase;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.PrintStream;
+import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 
 /**
  * Runs in an isolated JVM (via the {@code testMain} Gradle task) so that
@@ -140,7 +142,8 @@ public class MainTest extends TestCase {
   public void testRunCrlfClassHeaderFileGeneratesLfOnlyOutput() throws Exception {
     File inputDir = FileUtilRt.createTempDirectory("main-test-in", null, true);
     File output = FileUtilRt.createTempDirectory("main-test-out", null, true);
-    FileUtil.writeToFile(new File(inputDir, "header.txt"), "// first header line\r\n// second header line\r\n");
+    Files.write(new File(inputDir, "header.txt").toPath(),
+                "// first header line \u00ab\r\n// second header line\r\n".getBytes(StandardCharsets.UTF_8));
     FileUtil.writeToFile(new File(inputDir, "Grammar.bnf"),
                          "{ parserClass=\"com.example.TestParser\" classHeader=\"header.txt\" }\nroot ::= 'x'");
 
@@ -148,9 +151,84 @@ public class MainTest extends TestCase {
 
     File parser = findFile(output, "TestParser.java");
     assertNotNull("Expected TestParser.java under " + output, parser);
-    String text = FileUtil.loadFile(parser);
-    assertContains(text, "// first header line\n// second header line\n");
+    String text = new String(Files.readAllBytes(parser.toPath()), StandardCharsets.UTF_8);
+    assertContains(text, "// first header line \u00ab\n// second header line\n");
     assertFalse("Carriage return in generated " + parser.getName(), text.indexOf('\r') >= 0);
+  }
+
+  /**
+   * Both ends of a standalone run are UTF-8: the grammar is decoded as UTF-8 and the generated
+   * files are encoded as UTF-8, so non-ASCII content does not depend on the JVM default charset
+   * (which is the platform encoding below JDK 18, and follows {@code -Dfile.encoding} above it).
+   */
+  public void testRunNonAsciiGrammarRoundTripsAsUtf8() throws Exception {
+    File inputDir = FileUtilRt.createTempDirectory("main-test-in", null, true);
+    File output = FileUtilRt.createTempDirectory("main-test-out", null, true);
+    File grammarFile = new File(inputDir, "Grammar.bnf");
+    String grammar = """
+      { parserClass="com.example.TestParser" }
+      root ::= '\u00ab' | '\u00bb'
+      """;
+    Files.write(grammarFile.toPath(), grammar.getBytes(StandardCharsets.UTF_8));
+
+    assertEquals(0, Main.run(new String[]{output.getAbsolutePath(), inputDir + "/Grammar.bnf"}));
+
+    File parser = findFile(output, "TestParser.java");
+    assertNotNull("Expected TestParser.java under " + output, parser);
+    String text = new String(Files.readAllBytes(parser.toPath()), StandardCharsets.UTF_8);
+    assertContains(text, "\u00ab");
+    assertContains(text, "\u00bb");
+    // "\u00c2" is what a UTF-8 grammar decoded as a single-byte charset turns "\u00ab" into
+    assertFalse("Grammar decoded with the wrong charset:\n" + text, text.contains("\u00c2"));
+  }
+
+  /**
+   * A grammar carrying a byte order mark is decoded by that mark, not by the UTF-8 default, and
+   * the mark itself does not survive into the generated sources.
+   */
+  public void testRunBomGrammarsAreDecodedByTheirBom() throws Exception {
+    String grammar = """
+      { parserClass="com.example.TestParser" }
+      root ::= '\u00ab' | '\u00bb'
+      """;
+    assertBomGrammarGenerates(grammar, StandardCharsets.UTF_8, new byte[]{(byte)0xEF, (byte)0xBB, (byte)0xBF});
+    assertBomGrammarGenerates(grammar, StandardCharsets.UTF_16LE, new byte[]{(byte)0xFF, (byte)0xFE});
+    assertBomGrammarGenerates(grammar, StandardCharsets.UTF_16BE, new byte[]{(byte)0xFE, (byte)0xFF});
+  }
+
+  private void assertBomGrammarGenerates(String grammar, java.nio.charset.Charset charset, byte[] bom) throws Exception {
+    File inputDir = FileUtilRt.createTempDirectory("main-test-in", null, true);
+    File output = FileUtilRt.createTempDirectory("main-test-out", null, true);
+    byte[] body = grammar.getBytes(charset);
+    byte[] all = new byte[bom.length + body.length];
+    System.arraycopy(bom, 0, all, 0, bom.length);
+    System.arraycopy(body, 0, all, bom.length, body.length);
+    Files.write(new File(inputDir, "Grammar.bnf").toPath(), all);
+
+    assertEquals(charset.name(), 0, Main.run(new String[]{output.getAbsolutePath(), inputDir + "/Grammar.bnf"}));
+
+    File parser = findFile(output, "TestParser.java");
+    assertNotNull(charset + ": expected TestParser.java under " + output, parser);
+    String text = new String(Files.readAllBytes(parser.toPath()), StandardCharsets.UTF_8);
+    assertContains(text, "\u00ab");
+    assertFalse(charset + ": byte order mark survived into the output", text.contains("\uFEFF"));
+  }
+
+  /** The same for a {@code classHeader} file, whose text is copied into every generated file. */
+  public void testRunBomClassHeaderFileDropsTheMark() throws Exception {
+    File inputDir = FileUtilRt.createTempDirectory("main-test-in", null, true);
+    File output = FileUtilRt.createTempDirectory("main-test-out", null, true);
+    Files.write(new File(inputDir, "header.txt").toPath(),
+                ("\uFEFF// header \u00ab\n").getBytes(StandardCharsets.UTF_8));
+    FileUtil.writeToFile(new File(inputDir, "Grammar.bnf"),
+                         "{ parserClass=\"com.example.TestParser\" classHeader=\"header.txt\" }\nroot ::= 'x'");
+
+    assertEquals(0, Main.run(new String[]{output.getAbsolutePath(), inputDir + "/Grammar.bnf"}));
+
+    File parser = findFile(output, "TestParser.java");
+    assertNotNull("Expected TestParser.java under " + output, parser);
+    String text = new String(Files.readAllBytes(parser.toPath()), StandardCharsets.UTF_8);
+    assertTrue("Header not at the very start of:\n" + text, text.startsWith("// header \u00ab\n"));
   }
 
   private static File findFile(File dir, String name) {

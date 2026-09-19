@@ -7,6 +7,7 @@ package org.intellij.grammar.inspection;
 import com.intellij.codeInspection.LocalInspectionTool;
 import com.intellij.codeInspection.LocalInspectionToolSession;
 import com.intellij.codeInspection.ProblemsHolder;
+import com.intellij.openapi.util.text.StringUtil;
 import com.intellij.psi.PsiElementVisitor;
 import org.intellij.grammar.KnownAttribute;
 import org.intellij.grammar.psi.BnfAttr;
@@ -27,7 +28,7 @@ final class BnfUnusedAttributeInspection extends LocalInspectionTool {
       @Override
       public Void visitAttr(@NotNull BnfAttr o) {
         String name = o.getName();
-        if (!name.toUpperCase().equals(name) && getAttribute(name) == null) {
+        if (!StringUtil.toUpperCase(name).equals(name) && getAttribute(name) == null) {
           KnownAttribute<?> newAttr = getCompatibleAttribute(name);
           String text = newAttr == null ? "Unused attribute" : "Deprecated attribute, use '" + newAttr.getName() + "' instead";
           holder.registerProblem(o.getId(), text);

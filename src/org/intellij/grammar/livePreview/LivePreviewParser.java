@@ -560,7 +560,9 @@ public class LivePreviewParser implements PsiParser {
   }
 
   private IElementType getTokenElementType(String token) {
-    return token == null ? null : myTokenElementTypes.get(myTokenTypeText + token.toUpperCase());
+    // Case.UPPER, not StringUtil.toUpperCase: the map keys are built with Case.UPPER in
+    // LivePreviewLexer, and the two disagree on multi-char expansions such as "\u00df" -> "SS"
+    return token == null ? null : myTokenElementTypes.get(myTokenTypeText + Case.UPPER.apply(token));
   }
 
   private boolean generateConsumeToken(PsiBuilder builder, String tokenName) {

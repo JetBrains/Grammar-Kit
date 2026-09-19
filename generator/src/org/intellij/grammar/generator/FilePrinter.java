@@ -11,6 +11,7 @@ import java.io.BufferedWriter;
 import java.io.Closeable;
 import java.io.PrintWriter;
 import java.io.Writer;
+import java.util.Locale;
 
 final class FilePrinter implements Closeable {
   private final @NotNull PrintWriter myOut;
@@ -26,9 +27,12 @@ final class FilePrinter implements Closeable {
   /**
    * Formats the string given the format and args and then
    * prints it to the output.
+   * <p>
+   * {@link Locale#ROOT}: the formatted text is source code, so {@code %d} must render Latin
+   * digits whatever the default locale's numbering system is.
    */
   public void out(@NotNull String format, Object... args) {
-    this.out(format.formatted(args));
+    this.out(String.format(Locale.ROOT, format, args));
   }
 
   /**

@@ -11,6 +11,7 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 
@@ -92,7 +93,7 @@ final class NodeCalls {
   ) implements NodeCall {
     @Override
     public @NotNull String render(@NotNull NameRenderer nameRenderer) {
-      return String.format("%s(%s, %d, %s)", methodName, builder, pin, StringUtil.join(tokens, ", "));
+      return String.format(Locale.ROOT, "%s(%s, %d, %s)", methodName, builder, pin, StringUtil.join(tokens, ", "));
     }
   }
 
@@ -104,7 +105,7 @@ final class NodeCalls {
   ) implements NodeCall {
     @Override
     public @NotNull String render(@NotNull NameRenderer nameRenderer) {
-      return String.format("%s.%s(%d, %s)", stateHolder, methodName, pin, StringUtil.join(tokens, ", "));
+      return String.format(Locale.ROOT, "%s.%s(%d, %s)", stateHolder, methodName, pin, StringUtil.join(tokens, ", "));
     }
   }
 
@@ -116,7 +117,7 @@ final class NodeCalls {
   ) implements NodeCall {
     @Override
     public @NotNull String render(@NotNull NameRenderer nameRenderer) {
-      return String.format("%s(%s, %s + 1, %d)", methodName, stateHolder, level, priority);
+      return String.format(Locale.ROOT, "%s(%s, %s + 1, %d)", methodName, stateHolder, level, priority);
     }
   }
 

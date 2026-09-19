@@ -25,6 +25,7 @@ import com.intellij.psi.util.PsiTreeUtil;
 import com.intellij.util.ObjectUtils;
 import com.intellij.util.ProcessingContext;
 import org.intellij.grammar.parser.GeneratedParserUtilBase;
+import org.intellij.grammar.util.Case;
 import org.intellij.jflex.psi.*;
 import org.intellij.jflex.psi.impl.JFlexFileImpl;
 import org.jetbrains.annotations.NotNull;
@@ -106,7 +107,7 @@ final class JFlexCompletionContributor extends CompletionContributor {
   }
 
   private static LookupElement createKeywordLookupItem(PsiFile psiFile, String keyword) {
-    LookupElementBuilder builder = LookupElementBuilder.create(keyword.toLowerCase()).withCaseSensitivity(false).bold();
+    LookupElementBuilder builder = LookupElementBuilder.create(Case.LOWER.apply(keyword)).withCaseSensitivity(false).bold();
     boolean braces = keyword.endsWith("{") || keyword.endsWith("}");
     if (!braces) {
       return keyword.startsWith("%") ? TailTypeDecorator.withTail(builder, TailTypes.spaceType()) : builder;

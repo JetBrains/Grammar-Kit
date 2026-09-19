@@ -51,8 +51,8 @@ final class BnfSuspiciousTokenInspection extends LocalInspectionTool {
   }
 
   public static boolean isTokenTextSuspicious(String text) {
-    boolean isLowercase = text.equals(text.toLowerCase());
-    boolean isUppercase = !isLowercase && text.equals(text.toUpperCase());
+    boolean isLowercase = text.equals(StringUtil.toLowerCase(text));
+    boolean isUppercase = !isLowercase && text.equals(StringUtil.toUpperCase(text));
     return !isLowercase && !isUppercase || isLowercase && StringUtil.containsAnyChar(text, "-_");
   }
 }

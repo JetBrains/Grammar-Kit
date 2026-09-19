@@ -105,6 +105,64 @@ public class MainTest extends TestCase {
     assertContains(stdOut(), "B.bnf");
   }
 
+  /**
+   * GitHub #468: a CRLF grammar used to leave a stray {@code \r} at the end of every
+   * {@code // rule expression} comment line, which showed up as an extra blank line in the diff.
+   * The generated output must be pure LF no matter the grammar's or the host's line separators.
+   */
+  public void testRunCrlfGrammarGeneratesLfOnlyOutput() throws Exception {
+    File inputDir = FileUtilRt.createTempDirectory("main-test-in", null, true);
+    File output = FileUtilRt.createTempDirectory("main-test-out", null, true);
+    String grammar = """
+      { parserClass="com.example.TestParser" }
+      root ::= first |
+          second |
+          third
+      first ::= 'a'
+      second ::= 'b'
+      third ::= 'c'
+      """;
+    FileUtil.writeToFile(new File(inputDir, "Grammar.bnf"), grammar.replace("\n", "\r\n"));
+
+    assertEquals(0, Main.run(new String[]{output.getAbsolutePath(), inputDir + "/Grammar.bnf"}));
+
+    File parser = findFile(output, "TestParser.java");
+    assertNotNull("Expected TestParser.java under " + output, parser);
+    String text = FileUtil.loadFile(parser);
+    assertContains(text, "// first |");
+    assertFalse("Carriage return in generated " + parser.getName(), text.indexOf('\r') >= 0);
+  }
+
+  /**
+   * A {@code classHeader} pointing at a CRLF file used to leak the same stray {@code \r} into
+   * every header line of every generated file - this path never goes through PSI.
+   */
+  public void testRunCrlfClassHeaderFileGeneratesLfOnlyOutput() throws Exception {
+    File inputDir = FileUtilRt.createTempDirectory("main-test-in", null, true);
+    File output = FileUtilRt.createTempDirectory("main-test-out", null, true);
+    FileUtil.writeToFile(new File(inputDir, "header.txt"), "// first header line\r\n// second header line\r\n");
+    FileUtil.writeToFile(new File(inputDir, "Grammar.bnf"),
+                         "{ parserClass=\"com.example.TestParser\" classHeader=\"header.txt\" }\nroot ::= 'x'");
+
+    assertEquals(0, Main.run(new String[]{output.getAbsolutePath(), inputDir + "/Grammar.bnf"}));
+
+    File parser = findFile(output, "TestParser.java");
+    assertNotNull("Expected TestParser.java under " + output, parser);
+    String text = FileUtil.loadFile(parser);
+    assertContains(text, "// first header line\n// second header line\n");
+    assertFalse("Carriage return in generated " + parser.getName(), text.indexOf('\r') >= 0);
+  }
+
+  private static File findFile(File dir, String name) {
+    File[] children = dir.listFiles();
+    if (children == null) return null;
+    for (File child : children) {
+      File found = child.isDirectory() ? findFile(child, name) : name.equals(child.getName()) ? child : null;
+      if (found != null) return found;
+    }
+    return null;
+  }
+
   private String stdOut() { return capturedOut.toString(); }
   private String stdErr() { return capturedErr.toString(); }
 

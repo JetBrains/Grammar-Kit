@@ -10,6 +10,7 @@ import junit.framework.TestSuite;
 import org.intellij.grammar.actions.BnfGenerationServiceIntegrationPlatformTest;
 import org.intellij.grammar.actions.BnfGenerationServiceTest;
 import org.intellij.grammar.expression.ExpressionParserTest;
+import org.intellij.grammar.generator.FilePrinterTest;
 import org.intellij.grammar.generator.JavaBnfGeneratorTest;
 import org.intellij.grammar.generator.KotlinBnfGeneratorTest;
 import org.intellij.grammar.inspection.BnfHighlightingTest;
@@ -50,6 +51,7 @@ public class BnfTestSuite extends TestCase {
     public static Test suite() {
       TestSuite testSuite = new TestSuite("Fast");
       testSuite.addTestSuite(BnfUtilTest.class);
+      testSuite.addTestSuite(FilePrinterTest.class);
       testSuite.addTestSuite(BnfGenerationServiceTest.class);
       testSuite.addTestSuite(JFlexGenerationTest.class);
       testSuite.addTestSuite(JFlexParserTest.class);

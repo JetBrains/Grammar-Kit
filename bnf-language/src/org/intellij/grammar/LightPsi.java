@@ -237,23 +237,34 @@ public class LightPsi {
       Init.addKeyedExtension(LanguageParserDefinitions.INSTANCE, language, definition, this);
       MockLanguageFileType fileType = new MockLanguageFileType(language, FileUtilRt.getExtension(name));
       app.registerFileType(fileType, fileType.getDefaultExtension());
-      LightVirtualFile file = new LightVirtualFile(name, fileType, text);
+      LightVirtualFile file = new LightVirtualFile(name, fileType, normalizeText(text));
       return ((PsiFileFactoryImpl)PsiFileFactory.getInstance(getProject())).trySetupPsiForFile(file, language, true, false);
     }
 
     protected @NotNull ASTNode createAST(@NotNull String text, @NotNull ParserDefinition definition) {
       PsiParser parser = definition.createParser(getProject());
       Lexer lexer = definition.createLexer(getProject());
-      PsiBuilderImpl psiBuilder = new PsiBuilderImpl(getProject(), null, definition, lexer, new CharTableImpl(), text, null, null);
+      PsiBuilderImpl psiBuilder = new PsiBuilderImpl(getProject(), null, definition, lexer, new CharTableImpl(), normalizeText(text), null, null);
       return parser.parse(definition.getFileNodeType(), psiBuilder);
     }
 
     protected @NotNull SyntaxTraverser<LighterASTNode> parseLight(@NotNull String text, @NotNull ParserDefinition definition) {
       LightPsiParser parser = (LightPsiParser)definition.createParser(getProject());
       Lexer lexer = definition.createLexer(getProject());
-      PsiBuilderImpl psiBuilder = new PsiBuilderImpl(getProject(), null, definition, lexer, new CharTableImpl(), text, null, null);
+      PsiBuilderImpl psiBuilder = new PsiBuilderImpl(getProject(), null, definition, lexer, new CharTableImpl(), normalizeText(text), null, null);
       parser.parseLight(definition.getFileNodeType(), psiBuilder);
       return SyntaxTraverser.lightTraverser(psiBuilder);
+    }
+
+    /**
+     * PSI text is {@code \n}-only by platform contract: in the IDE the document normalizes line
+     * separators before a tree is built. Here the text comes straight from disk, so a CRLF grammar
+     * would otherwise leave a stray {@code \r} at the end of every PSI line and leak into whatever
+     * echoes source text back out - notably the {@code // rule expression} comments the parser
+     * generator emits.
+     */
+    private static @NotNull String normalizeText(@NotNull String text) {
+      return StringUtil.convertLineSeparators(text);
     }
 
     private MockProject getProject() {

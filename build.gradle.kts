@@ -9,6 +9,8 @@ import org.gradle.kotlin.dsl.get
 import org.jetbrains.changelog.Changelog
 import org.jetbrains.changelog.ChangelogSectionUrlBuilder
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
+import org.jetbrains.kotlin.gradle.dsl.JvmTarget
+import org.jetbrains.kotlin.gradle.dsl.KotlinVersion as KotlinLangVersion
 import java.util.Base64
 import java.util.zip.ZipFile
 import org.gradle.api.artifacts.ProjectDependency
@@ -16,6 +18,7 @@ import org.gradle.api.artifacts.component.ProjectComponentIdentifier
 
 plugins {
     java
+    alias(libs.plugins.kotlin)
     idea
     `maven-publish`
     signing
@@ -71,10 +74,12 @@ dependencies {
 sourceSets {
     main {
         java.srcDirs("src")
+        kotlin.srcDirs("src")
         resources.srcDirs("resources")
     }
     test {
         java.srcDirs("tests")
+        kotlin.srcDirs("tests")
         resources.srcDirs("testData")
     }
 }
@@ -82,6 +87,17 @@ sourceSets {
 java {
     withJavadocJar()
     withSourcesJar()
+}
+
+kotlin {
+    compilerOptions {
+        // Must match the JavaCompile target below: Gradle fails the build on a mismatch.
+        jvmTarget = JvmTarget.fromTarget(providers.gradleProperty("javaVersion").get())
+        // Pinned to what the oldest supported platform (pluginSinceBuild) ships, not to what the
+        // compiler could emit: a newer metadata version is unreadable by that IDE's Kotlin plugin.
+        languageVersion = KotlinLangVersion.KOTLIN_2_1
+        apiVersion = KotlinLangVersion.KOTLIN_2_1
+    }
 }
 
 intellijPlatform {

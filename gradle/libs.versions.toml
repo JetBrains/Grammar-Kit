@@ -5,6 +5,7 @@ junit = "4.13.2"
 
 # plugins
 changelog = "2.5.0"
+kotlin = "2.2.21"
 intelliJPlatform = "2.11.0"
 githubRelease = "2.5.2"
 publishPlugin = "2.0.0"
@@ -16,5 +17,6 @@ junit = { group = "junit", name = "junit", version.ref = "junit" }
 [plugins]
 changelog = { id = "org.jetbrains.changelog", version.ref = "changelog" }
 githubRelease = { id = "com.github.breadmoirai.github-release", version.ref = "githubRelease" }
+kotlin = { id = "org.jetbrains.kotlin.jvm", version.ref = "kotlin" }
 intelliJPlatform = { id = "org.jetbrains.intellij.platform", version.ref = "intelliJPlatform" }
 publishPlugin = { id = "io.github.gradle-nexus.publish-plugin", version.ref = "publishPlugin" }

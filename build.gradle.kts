@@ -11,6 +11,7 @@ import org.jetbrains.changelog.ChangelogSectionUrlBuilder
 import org.jetbrains.intellij.platform.gradle.TestFrameworkType
 import org.jetbrains.kotlin.gradle.dsl.JvmTarget
 import org.jetbrains.kotlin.gradle.dsl.KotlinVersion as KotlinLangVersion
+import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 import java.util.Base64
 import java.util.zip.ZipFile
 import org.gradle.api.artifacts.ProjectDependency
@@ -225,6 +226,14 @@ tasks {
     // onto the test compile classpath. Put the modern annotations first so type-use annotations still resolve.
     named<JavaCompile>("compileTestJava") {
         classpath = modernAnnotations + classpath
+    }
+
+    // Same reason, for the Kotlin half of the test source set. KotlinCompile spells its compile
+    // classpath `libraries` rather than `classpath`.
+    named<KotlinCompile>("compileTestKotlin") {
+        val current = libraries.from.toList()
+        libraries.setFrom(modernAnnotations)
+        libraries.from(current)
     }
 
     named<Test>("test") {

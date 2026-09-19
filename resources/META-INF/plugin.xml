@@ -13,6 +13,8 @@
   <depends optional="true" config-file="plugin-kotlin.xml">org.jetbrains.kotlin</depends>
 
   <extensions defaultExtensionNs="com.intellij">
+    <notificationGroup id="Grammar Generator" displayType="BALLOON" key="notification.group.grammar.generator"/>
+
     <fileType name="BNF" implementationClass="org.intellij.grammar.BnfFileType" fieldName="INSTANCE" extensions="bnf" language="BNF"/>
     <fileType name="BNF_LP" implementationClass="org.intellij.grammar.livePreview.LivePreviewFileType" fieldName="INSTANCE" language="BNF_LP"/>
     <lang.parserDefinition language="BNF" implementationClass="org.intellij.grammar.BnfParserDefinition"/>

@@ -9,11 +9,15 @@ import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.intellij.grammar.actions.BnfGenerationServiceIntegrationPlatformTest;
 import org.intellij.grammar.actions.BnfGenerationServiceTest;
+import org.intellij.grammar.actions.GrammarKitCliRunnerPlatformTest;
+import org.intellij.grammar.actions.GrammarKitCliRunnerRunPlatformTest;
+import org.intellij.grammar.actions.GrammarKitCliRunnerTest;
 import org.intellij.grammar.expression.ExpressionParserTest;
 import org.intellij.grammar.generator.JavaBnfGeneratorTest;
 import org.intellij.grammar.generator.KotlinBnfGeneratorTest;
 import org.intellij.grammar.inspection.BnfHighlightingTest;
 import org.intellij.grammar.search.BnfFileUseScopeEnlargerTest;
+import org.intellij.grammar.settings.GrammarKitConfigurablePlatformTest;
 import org.intellij.grammar.intention.BnfConvertOptExpressionIntentionTest;
 import org.intellij.grammar.intention.BnfFlipChoiceIntentionTest;
 import org.intellij.jflex.JFlexCompletionTest;
@@ -41,6 +45,9 @@ public class BnfTestSuite extends TestCase {
     testSuite.addTestSuite(BnfGeneratorPsiTest.class);
 
     testSuite.addTestSuite(BnfGenerationServiceIntegrationPlatformTest.class);
+    testSuite.addTestSuite(GrammarKitCliRunnerPlatformTest.class);
+    testSuite.addTestSuite(GrammarKitCliRunnerRunPlatformTest.class);
+    testSuite.addTestSuite(GrammarKitConfigurablePlatformTest.class);
     testSuite.addTestSuite(JFlexCompletionTest.class);
     testSuite.addTestSuite(BnfFileUseScopeEnlargerTest.class);
     return testSuite;
@@ -51,6 +58,7 @@ public class BnfTestSuite extends TestCase {
       TestSuite testSuite = new TestSuite("Fast");
       testSuite.addTestSuite(BnfUtilTest.class);
       testSuite.addTestSuite(BnfGenerationServiceTest.class);
+      testSuite.addTestSuite(GrammarKitCliRunnerTest.class);
       testSuite.addTestSuite(JFlexGenerationTest.class);
       testSuite.addTestSuite(JFlexParserTest.class);
       testSuite.addTestSuite(BnfParserTest.class);

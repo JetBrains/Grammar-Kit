@@ -6,12 +6,9 @@ package org.intellij.grammar.actions;
 
 import com.intellij.execution.ExecutionException;
 import com.intellij.execution.configurations.SimpleJavaParameters;
-import com.intellij.execution.filters.TextConsoleBuilderFactory;
 import com.intellij.execution.process.OSProcessHandler;
 import com.intellij.execution.process.ProcessAdapter;
 import com.intellij.execution.process.ProcessEvent;
-import com.intellij.execution.ui.ConsoleView;
-import com.intellij.execution.ui.ConsoleViewContentType;
 import com.intellij.openapi.actionSystem.*;
 import com.intellij.openapi.application.ApplicationManager;
 import com.intellij.openapi.application.WriteAction;
@@ -34,28 +31,19 @@ import com.intellij.openapi.vfs.JarFileSystem;
 import com.intellij.openapi.vfs.VfsUtil;
 import com.intellij.openapi.vfs.VfsUtilCore;
 import com.intellij.openapi.vfs.VirtualFile;
-import com.intellij.openapi.wm.ToolWindow;
-import com.intellij.openapi.wm.ToolWindowId;
-import com.intellij.openapi.wm.ToolWindowManager;
 import com.intellij.psi.PsiDocumentManager;
-import com.intellij.ui.content.Content;
-import com.intellij.ui.content.ContentFactory;
-import com.intellij.ui.content.MessageView;
-import com.intellij.util.ObjectUtils;
 import com.intellij.util.SystemProperties;
 import com.intellij.util.containers.ContainerUtil;
 import com.intellij.util.containers.JBIterable;
 import com.intellij.util.download.DownloadableFileDescription;
 import com.intellij.util.download.DownloadableFileService;
-import com.intellij.util.ui.UIUtil;
 import org.intellij.grammar.config.Options;
 import org.intellij.grammar.generator.batch.FileGeneratorUtil;
+import org.intellij.grammar.settings.GrammarKitSettings;
 import org.intellij.jflex.parser.JFlexFileType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import javax.swing.*;
-import java.awt.*;
 import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
@@ -82,6 +70,10 @@ import static org.intellij.grammar.generator.batch.FileGeneratorUtil.getTargetDi
  *
  * <p>The action is visible and enabled only when at least one {@code .flex} file is selected.
  *
+ * <p>When {@link GrammarKitSettings#getJFlexCli()} is set, none of the above applies: the whole
+ * selection is handed to that command line in a single invocation (see {@link GrammarKitCliRunner}),
+ * and JFlex is neither downloaded nor located.
+ *
  * @author greg
  */
 public class BnfRunJFlexAction extends DumbAwareAction {
@@ -92,8 +84,6 @@ public class BnfRunJFlexAction extends DumbAwareAction {
   private static final String SKEL_NAME = "idea-flex.skeleton";
   private static final String JFLEX_JAR_PREFIX = "jflex-";
   private static final String LIB_NAME = "JFlex & idea-flex.skeleton";
-
-  private static final Key<Pair<String, OSProcessHandler>> BATCH_ID_KEY = Key.create("BnfRunJFlexAction.batchId");
 
   @Override
   public @NotNull ActionUpdateThread getActionUpdateThread() {
@@ -128,6 +118,12 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     PsiDocumentManager.getInstance(project).commitAllDocuments();
     FileDocumentManager.getInstance().saveAllDocuments();
 
+    String cli = GrammarKitSettings.getInstance(project).getJFlexCli();
+    if (!cli.isEmpty()) {
+      GrammarKitCliRunner.getInstance(project).run(files, cli, "JFlex");
+      return;
+    }
+
     Couple<File> flexFiles = getOrDownload(project);
     if (flexFiles == null) {
       fail(project, "JFlex jar not found",
@@ -159,7 +155,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
    * @param flexFile the {@code .flex} grammar file to compile
    * @param jflex    {@code first} — the JFlex JAR; {@code second} — the skeleton file (may be {@code null})
    * @param batchId  opaque identifier that groups multiple files from a single action invocation
-   *                 into the same console tab (see {@link #showConsole})
+   *                 into the same console tab (see {@link GrammarKitConsole#showConsole})
    * @return a callback that is {@linkplain ActionCallback#setDone() done} on exit code 0,
    * or {@linkplain ActionCallback#setRejected() rejected} on failure
    */
@@ -203,7 +199,7 @@ public class BnfRunJFlexAction extends DumbAwareAction {
 
       OSProcessHandler processHandler = javaParameters.createOSProcessHandler();
 
-      showConsole(project, "JFlex", batchId, processHandler);
+      GrammarKitConsole.showConsole(project, "JFlex", batchId, processHandler);
 
       ActionCallback callback = new ActionCallback();
       processHandler.addProcessListener(new ProcessAdapter() {
@@ -220,96 +216,6 @@ public class BnfRunJFlexAction extends DumbAwareAction {
     catch (ExecutionException ex) {
       Messages.showErrorDialog(project, "Unable to run JFlex" + "\n" + ex.getLocalizedMessage(), "JFlex");
       return ActionCallback.REJECTED;
-    }
-  }
-
-  /**
-   * Attaches a process to a console tab in the {@code Messages} tool window and activates the window.
-   *
-   * <p>Tab-reuse strategy:
-   * <ul>
-   *   <li>If a tab already exists for the given {@code batchId} (i.e., this is not the first file in a
-   *       multi-file invocation), the existing console is reused and a separator is printed.</li>
-   *   <li>Otherwise, if there is an unpinned tab whose previous process has already terminated, that tab
-   *       is cleared and reused.</li>
-   *   <li>If neither condition holds, a new tab is created with the given {@code title}.</li>
-   * </ul>
-   *
-   * @param project        the current project
-   * @param title          tab label used when a new tab must be created
-   * @param batchId        opaque identifier shared by all files in a single action invocation
-   * @param processHandler the process whose output should be shown in the console
-   */
-  public static void showConsole(@NotNull Project project,
-                                 @NotNull String title,
-                                 @NotNull String batchId,
-                                 @NotNull OSProcessHandler processHandler) {
-    MessageView messageView = MessageView.getInstance(project);
-    Content batchContent = null, stoppedContent = null;
-    for (Content c : messageView.getContentManager().getContents()) {
-      Pair<String, OSProcessHandler> data = c.getUserData(BATCH_ID_KEY);
-      if (data == null) continue;
-      if (data.first.equals(batchId)) {
-        batchContent = c;
-      }
-      else if (data.second.isProcessTerminated() || data.second.isProcessTerminating()) {
-        if (!c.isPinned()) {
-          stoppedContent = c;
-        }
-      }
-    }
-    Content content = ObjectUtils.chooseNotNull(batchContent, stoppedContent);
-    ConsoleView consoleView = content == null ? null : UIUtil.uiTraverser(content.getComponent()).filter(ConsoleView.class).first();
-
-    if (content != null && consoleView != null) {
-      if (content == batchContent) {
-        consoleView.print("\n\n\n", ConsoleViewContentType.SYSTEM_OUTPUT);
-      }
-      else {
-        consoleView.clear();
-      }
-      attachAndActivate(project, batchId, processHandler, content, consoleView);
-      return;
-    }
-
-    consoleView = TextConsoleBuilderFactory.getInstance().createBuilder(project).getConsole();
-
-    JComponent panel = new JPanel(new BorderLayout());
-    panel.add(consoleView.getComponent(), BorderLayout.CENTER);
-
-    DefaultActionGroup toolbarActions = new DefaultActionGroup();
-    for (AnAction action : consoleView.createConsoleActions()) {
-      toolbarActions.add(action);
-    }
-    ActionToolbar toolbar = ActionManager.getInstance().createActionToolbar(ActionPlaces.TOOLBAR, toolbarActions, false);
-    toolbar.setTargetComponent(consoleView.getComponent());
-    panel.add(toolbar.getComponent(), BorderLayout.WEST);
-
-    content = ContentFactory.getInstance().createContent(panel, title, true);
-    messageView.getContentManager().addContent(content);
-    Disposer.register(content, consoleView);
-
-    attachAndActivate(project, batchId, processHandler, content, consoleView);
-  }
-
-  /**
-   * Wires a process handler to a console view, stamps the content tab with the batch identifier,
-   * and brings the {@code Messages} tool window to the front with that tab selected.
-   *
-   * <p>Stamping the tab with {@link #BATCH_ID_KEY} is what allows subsequent calls from the same
-   * batch (multi-file invocation) to locate and reuse the tab instead of opening a new one.
-   */
-  private static void attachAndActivate(@NotNull Project project,
-                                        @NotNull String batchId,
-                                        @NotNull OSProcessHandler processHandler,
-                                        @NotNull Content content,
-                                        @NotNull ConsoleView consoleView) {
-    ToolWindow toolWindow = ToolWindowManager.getInstance(project).getToolWindow(ToolWindowId.MESSAGES_WINDOW);
-    content.putUserData(BATCH_ID_KEY, Pair.create(batchId, processHandler));
-    consoleView.attachToProcess(processHandler);
-
-    if (toolWindow != null) {
-      toolWindow.activate(() -> toolWindow.getContentManager().setSelectedContent(content), false, false);
     }
   }
 

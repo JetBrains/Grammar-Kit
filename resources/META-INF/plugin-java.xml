@@ -15,6 +15,11 @@
     <notificationGroup id="grammarkit.parser.generator.log" displayType="NONE" key="notification.group.parser.generator.log"/>
 
     <useScopeEnlarger implementation="org.intellij.grammar.search.BnfJavaFileUseScopeEnlarger"/>
+
+    <projectConfigurable id="grammar.kit.settings" groupId="language"
+                         key="settings.grammar.kit.display.name"
+                         bundle="messages.GrammarKitBundle"
+                         instance="org.intellij.grammar.settings.GrammarKitConfigurable"/>
   </extensions>
   <actions>
     <group id="grammar.group">

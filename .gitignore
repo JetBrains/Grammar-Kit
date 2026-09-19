@@ -17,3 +17,6 @@ build-lightpsi/
 /.intellijPlatform/
 /.claude/
 /.mcp.json
+
+# Kotlin Gradle plugin project data
+.kotlin/

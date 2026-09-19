@@ -503,8 +503,92 @@ element_list ::= '(' element (',' (element | &')'))* ')' {pin(".*")=1}
 ... to be continued
 
 
-V. Standalone usage POC
-=======================
+V. Custom generator command line
+================================
+
+By default *Generate Parser Code* generates in-process, and *Run JFlex Generator* runs a
+downloaded `jflex-*.jar`. Either action can be pointed at an arbitrary command instead, in
+*Settings | Languages & Frameworks | Grammar-Kit*. The settings are stored in
+`.idea/grammarKit.xml`, so they can be shared with the team.
+
+The contract is minimal — the plugin runs:
+
+````
+<command> <absolute grammar file path>...
+````
+
+from the project's base directory. Every selected grammar is appended, so the command is invoked
+once no matter how many files are selected. Nothing else is passed: the output directory,
+generator flags, JVM selection and Kotlin-vs-Java choice all belong inside whatever the command
+points at.
+
+````
+// Generate Parser Code
+$PROJECT_DIR$/scripts/gen-parser.sh
+
+// Run JFlex Generator
+java -jar $PROJECT_DIR$/tools/jflex-1.10.17.jar -d $PROJECT_DIR$/gen
+````
+
+To put the paths somewhere other than the end — before a trailing flag, or after an explicit
+`--` — write `$GrammarFiles$` as an argument of its own:
+
+````
+java -jar $PROJECT_DIR$/tools/gk.jar gen $GrammarFiles$ --out $PROJECT_DIR$/gen
+````
+
+Notes:
+
+* `$GrammarFiles$` is recognised as a **whole argument only**. Inside a larger one —
+  `--files=$GrammarFiles$` — it is left literal, since several paths cannot be joined into one
+  argument in any way that is right for every tool. Using it twice, or in the very first
+  position — where the executable belongs — is an error.
+* The text is split into arguments **before** macros are expanded, so an argument containing a
+  space must be double-quoted: `--out "some dir/gen"`. A `$PROJECT_DIR$` that expands to a path
+  with a space in it survives as a single argument.
+* Project path macros (`$PROJECT_DIR$` and user-defined ones) are expanded, so a command
+  referring to a script inside the repository stays portable.
+* The command is **not** run through a shell: `&&`, pipes, `~` and `$VAR` are not interpreted.
+  Use `sh -c '...'` or a script file for those.
+* Since the command is opaque, the plugin falls back to refreshing all project content roots once
+  it exits. A command can avoid that entirely by reporting what it produced — see below.
+* Leaving a field empty restores the built-in behaviour for that action. With a JFlex command
+  configured, the JFlex jar is neither downloaded nor looked up.
+* A plugin version that predates this feature ignores `.idea/grammarKit.xml` entirely — it neither
+  reads nor rewrites it, so the file survives such a teammate untouched. They do, however, silently
+  get the built-in in-process generation, so a project relying on a custom command should say so in
+  its own README.
+
+
+### Reporting produced files
+
+Optionally, the command may print one line per file it produced:
+
+````
+grammar-kit:generated <path>
+````
+
+The path is the rest of the line, so no quoting is needed for paths containing spaces, and a
+relative path resolves against the command's own working directory — the same one it was started
+in, so both ends agree on where it points. Lines are read from both stdout and
+stderr, and may appear anywhere in the output, though printing them at the end is the natural
+choice. The output is decoded with the platform console encoding, so a path with non-ASCII
+characters may not round-trip on Windows; such a file simply falls back to not being refreshed
+individually.
+
+When at least one such line is printed, only those files are refreshed instead of every project
+content root — worth doing for large projects. Printing nothing is fine and keeps the fallback.
+
+````
+#!/bin/sh
+# the arguments are the absolute paths of the selected grammars
+java -jar "$PROJECT_TOOLS/grammar-kit.jar" gen "$@"
+find gen -name '*.java' -newer "$1" | while read -r f; do echo "grammar-kit:generated $f"; done
+````
+
+
+VI. Standalone usage POC
+========================
 
 This section is a **Proof-of-Concept** only. All described below is not supported and certainly out of date.
 

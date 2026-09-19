@@ -29,6 +29,7 @@ import org.intellij.grammar.generator.CommonBnfConstants;
 import org.intellij.grammar.generator.JavaParserGenerator;
 import org.intellij.grammar.generator.batch.*;
 import org.intellij.grammar.psi.BnfFile;
+import org.intellij.grammar.settings.GrammarKitSettings;
 import org.jetbrains.annotations.NotNull;
 
 import java.util.List;
@@ -37,6 +38,10 @@ import java.util.List;
  * IDE action that triggers parser/PSI generation from one or more {@code .bnf} grammar files.
  * Generation logic lives in {@link BnfGenerationService}; this class wires it to the IDE action
  * system, drives the progress bar, and posts notifications — all via {@link BatchGenerationTask}.
+ *
+ * <p>When {@link GrammarKitSettings#getParserCli()} is set, the in-process generator is bypassed
+ * and the whole selection is handed to that command line in a single invocation
+ * (see {@link GrammarKitCliRunner}).
  */
 public class GenerateAction extends AnAction {
   private static final Logger LOG = Logger.getInstance(GenerateAction.class);
@@ -70,6 +75,12 @@ public class GenerateAction extends AnAction {
 
     List<VirtualFile> files = getFiles(e).toList();
     if (files.isEmpty()) return;
+
+    String cli = GrammarKitSettings.getInstance(project).getParserCli();
+    if (!cli.isEmpty()) {
+      GrammarKitCliRunner.getInstance(project).run(files, cli, "Parser");
+      return;
+    }
 
     var context = WriteAction.compute(() -> BnfGenerationService.prepareGenerationContext(project, files));
     ProgressManager.getInstance().run(new BatchGenerationTask(project, context));
